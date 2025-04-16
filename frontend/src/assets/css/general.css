@@ -1,16 +1,140 @@
+/* Базовые стили для body */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f4f4;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
 }
 
+/* Контейнер */
 .container {
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
+/* Заголовки */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
+
+/* Текст */
+p {
+  margin: 0 0 1rem;
+  color: var(--text-color);
+}
+
+/* Ссылки */
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+/* Кнопки */
+button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+/* Отступы */
+.mt-1 {
+  margin-top: 1rem;
+}
+
+.mt-2 {
+  margin-top: 2rem;
+}
+
+.mb-1 {
+  margin-bottom: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 2rem;
+}
+
+.pt-1 {
+  padding-top: 1rem;
+}
+
+.pt-2 {
+  padding-top: 2rem;
+}
+
+.pb-1 {
+  padding-bottom: 1rem;
+}
+
+.pb-2 {
+  padding-bottom: 2rem;
+}
+
+/* Карточки */
+.card {
+  background-color: var(--surface-ground);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transition: box-shadow 0.3s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Секции */
 .section {
   padding: 2rem 0;
 }

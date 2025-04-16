@@ -1,15 +1,35 @@
+/* Светлая тема */
 :root {
   --surface-ground: #ffffff;
-  --text-color: #000000;
-  --primary-color: #007bff;
-  --secondary-color: #6c757d;
-  --background-color: #f8f9fa;
+  --text-color: #333333;
+  --primary-color: #4caf50;
+  --secondary-color: #2196f3;
+  --background-color: #f9f9f9;
+  --border-color: #e0e0e0;
+  --hover-color: #f1f1f1;
+  --danger-color: #f44336;
+  --success-color: #4caf50;
+  --warning-color: #ff9800;
+  --menu-background-color: #333333;
+  --menu-text-color: #ffffff;
+  --menu-hover-color: #444444;
+  --menu-hover-text-color: #ffffff;
 }
 
+/* Темная тема */
 :root.dark {
   --surface-ground: #1e1e1e;
-  --text-color: #ffffff;
-  --primary-color: #0d6efd;
-  --secondary-color: #adb5bd;
+  --text-color: #e0e0e0;
+  --primary-color: #81c784;
+  --secondary-color: #64b5f6;
   --background-color: #121212;
+  --border-color: #333333;
+  --hover-color: #2c2c2c;
+  --danger-color: #e57373;
+  --success-color: #81c784;
+  --warning-color: #ffb74d;
+  --menu-background-color: #f1f1f1;
+  --menu-text-color: #333333;
+  --menu-hover-color: #e0e0e0;
+  --menu-hover-text-color: #000000;
 }
