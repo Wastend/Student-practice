@@ -144,3 +144,15 @@ button:disabled {
   flex-direction: column;
   gap: 1rem;
 }
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 65px;
+}
+
+@media(max-width: 768px) {
+  main {
+    gap: 30px;
+  }
+}

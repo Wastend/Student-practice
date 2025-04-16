@@ -80,6 +80,7 @@ const closeMobileMenu = () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   padding: 1rem 0;
+  margin-bottom: 60px;
 }
 
 .header-wrap {
@@ -174,6 +175,10 @@ const closeMobileMenu = () => {
 }
 
 @media (max-width: 768px) {
+  .header {
+    margin-bottom: 20px;
+  }
+
   .nav-actions {
     visibility: hidden;
     flex-direction: column;
