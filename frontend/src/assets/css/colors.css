@@ -1,0 +1,15 @@
+:root {
+  --surface-ground: #ffffff;
+  --text-color: #000000;
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --background-color: #f8f9fa;
+}
+
+:root.dark {
+  --surface-ground: #1e1e1e;
+  --text-color: #ffffff;
+  --primary-color: #0d6efd;
+  --secondary-color: #adb5bd;
+  --background-color: #121212;
+}
