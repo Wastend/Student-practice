@@ -56,27 +56,33 @@
   </section>
 </template>
 <script setup>
-import Stepper from "primevue/stepper";
-import StepList from "primevue/steplist";
-import StepPanels from "primevue/steppanels";
-import StepItem from "primevue/stepitem";
-import Step from "primevue/step";
-import StepPanel from "primevue/steppanel";
 import SvgIcon from "@/components/ui/SvgIcon.vue";
+import Step from "primevue/step";
+import StepList from "primevue/steplist";
+import StepPanel from "primevue/steppanel";
+import StepPanels from "primevue/steppanels";
+import Stepper from "primevue/stepper";
 </script>
 <style>
 .useful {
   background-image: url("@/assets/images/research.png");
+  background-size: cover;
+  background-repeat: no-repeat;
   backdrop-filter: grayscale(30%);
+  box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.5);
   position: relative;
   padding: 40px 0;
+}
+
+.dark .useful {
+  box-shadow: 0 0 20px 5px rgba(116, 116, 116, 0.5);
 }
 
 .useful::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5); /* степень затемнения */
+  background: rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -92,10 +98,6 @@ import SvgIcon from "@/components/ui/SvgIcon.vue";
 
 .useful-wrap .p-step-header .p-step-title {
   color: #f9f9f9;
-}
-
-.useful-wrap .p-step-active .p-step-header span {
-  color: #21e0f3;
 }
 
 .p-steppanel.useful-block {

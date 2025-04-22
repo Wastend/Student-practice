@@ -23,13 +23,17 @@
               @click="closeMobileMenu"
               >Вакансии</RouterLink
             >
-            <RouterLink to="/profile" class="nav-item" @click="closeMobileMenu"
-              >Профиль</RouterLink
-            >
           </nav>
 
-          <button class="auth-button" @click="handleAuthClick">
-            <i :class="isAuthenticated ? 'pi pi-user' : 'pi pi-sign-in'"></i>
+          <button
+            v-if="!isAuthenticated"
+            class="auth-button"
+            @click="handleAuthClick"
+          >
+            <i class="pi pi-sign-in"></i>
+          </button>
+          <button v-else class="auth-button" @click="goToProfile">
+            <i class="pi pi-user"></i>
           </button>
 
           <button class="theme-toggle" @click="toggleTheme">
@@ -42,12 +46,12 @@
 </template>
 
 <script setup>
+import SvgIcon from "@/components/ui/SvgIcon.vue";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import SvgIcon from "@/components/ui/SvgIcon.vue";
 
 const isDarkTheme = ref(false);
-const isAuthenticated = ref(false);
+const isAuthenticated = ref(localStorage.getItem("token") !== null);
 const isMobileMenuOpen = ref(false);
 const router = useRouter();
 
@@ -57,11 +61,11 @@ const toggleTheme = () => {
 };
 
 const handleAuthClick = () => {
-  if (isAuthenticated.value) {
-    router.push("/dashboard");
-  } else {
-    router.push("/login");
-  }
+  router.push("/login");
+};
+
+const goToProfile = () => {
+  router.push("/profile");
 };
 
 const toggleMobileMenu = () => {
@@ -87,6 +91,7 @@ const closeMobileMenu = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .logo {

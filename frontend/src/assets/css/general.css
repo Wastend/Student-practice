@@ -10,6 +10,9 @@ body {
 
 /* Контейнер */
 .container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   max-width: 1440px;
   margin: 0 auto;
   padding: 0 20px;
@@ -149,6 +152,23 @@ main {
   display: flex;
   flex-direction: column;
   gap: 65px;
+  margin-bottom: 30px;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.gap-2 {
+  gap: .5rem;
 }
 
 @media(max-width: 768px) {
