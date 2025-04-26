@@ -2,7 +2,7 @@
   <section class="useful">
     <div class="container">
       <div class="useful-wrap">
-        <h2>Шаги для попадания на стажировку</h2>
+        <h2>Как попасть на стажировку</h2>
         <Stepper value="1">
           <StepList>
             <Step value="1">Найдите подходящую вакансию</Step>

@@ -26,7 +26,7 @@
               <label for="password">Пароль</label>
               <Password id="password" v-model="password" toggleMask required />
             </div>
-            <div v-if="role.value === 'company'" class="company-fields">
+            <div v-if="role?.value === 'company'" class="company-fields">
               <div class="form-group">
                 <label for="companyName">Название компании</label>
                 <InputText id="companyName" v-model="companyName" required />
@@ -65,6 +65,7 @@
 import { Button, Card, InputText, Password, Select, Textarea } from "primevue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { register } from "@/api";
 
 const roles = [
   { label: "Студент", value: "student" },
@@ -79,14 +80,24 @@ const companyWebsite = ref("");
 const companyDescription = ref("");
 const router = useRouter();
 
-const handleRegister = () => {
-  if (role.value === "company" && !companyName.value) {
-    alert("Пожалуйста, укажите название компании");
-    return;
-  }
-  // Пример регистрации
-  localStorage.setItem("token", "example-token");
-  router.push("/profile");
+const handleRegister = async () => {
+    try {
+        const userData = {
+            username: email.value.split("@")[0],
+            email: email.value,
+            password: password.value,
+            role_id: role.value === "student" ? 1 : 2,
+            company_name: companyName.value || null,
+            company_website: companyWebsite.value || null,
+            company_description: companyDescription.value || null,
+        };
+        await register(userData);
+        alert("Регистрация прошла успешно!");
+        router.push("/login");
+    } catch (error) {
+        console.error("Ошибка при регистрации:", error);
+        alert("Ошибка при регистрации");
+    }
 };
 </script>
 

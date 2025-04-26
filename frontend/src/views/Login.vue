@@ -31,18 +31,21 @@
 import { Button, Card, InputText, Password } from "primevue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { login } from "@/api";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 
-const handleLogin = () => {
-  if (email.value === "user@example.com" && password.value === "password") {
-    localStorage.setItem("token", "example-token");
-    router.push("/profile");
-  } else {
-    alert("Неверные данные для входа");
-  }
+const handleLogin = async () => {
+    try {
+        const { token } = await login(email.value, password.value);
+        localStorage.setItem("token", token);
+        router.push("/profile");
+    } catch (error) {
+        console.error("Ошибка при входе:", error);
+        alert("Неверные данные для входа");
+    }
 };
 </script>
 

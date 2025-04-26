@@ -1,14 +1,20 @@
+require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const cors = require('cors'); // Импортируем CORS
 const routes = require('./routes/index');
 
 const app = express();
 
+// Настройка CORS
+app.use(cors({
+    origin: 'http://localhost:5173', // Разрешаем запросы с фронтенда
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Разрешённые методы
+    credentials: true, // Если используются куки
+}));
+
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api', routes);

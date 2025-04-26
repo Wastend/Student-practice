@@ -1,4 +1,3 @@
-<!-- filepath: /Users/evgeniy/sites/Student-practice/frontend/src/views/CreateVacancy.vue -->
 <template>
   <section class="create-vacancy">
     <div class="container">
@@ -88,6 +87,7 @@ import {
 } from "primevue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { createJob } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
@@ -122,15 +122,15 @@ onMounted(() => {
   }
 });
 
-const handleSubmit = () => {
-  if (isEditing.value) {
-    console.log("Вакансия обновлена:", vacancy.value);
-    alert("Вакансия успешно обновлена!");
-  } else {
-    console.log("Вакансия создана:", vacancy.value);
+const handleSubmit = async () => {
+  try {
+    await createJob(vacancy.value);
     alert("Вакансия успешно создана!");
+    router.push("/profile");
+  } catch (error) {
+    console.error("Ошибка при создании вакансии:", error);
+    alert("Ошибка при создании вакансии");
   }
-  router.push("/profile");
 };
 
 const goToCreateTest = () => {
