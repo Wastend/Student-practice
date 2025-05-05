@@ -30,8 +30,8 @@ export const createJob = async (jobData) => {
 };
 
 // Работа с заявками
-export const getApplications = async () => {
-    const response = await axios.get("/applications");
+export const getApplications = async (filters = {}) => {
+    const response = await axios.get("/applications", { params: filters });
     return response.data;
 };
 
@@ -41,8 +41,8 @@ export const createApplication = async (applicationData) => {
 };
 
 // Работа с тестами
-export const getTests = async () => {
-    const response = await axios.get("/tests");
+export const getTests = async (filters = {}) => {
+    const response = await axios.get("/tests", { params: filters });
     return response.data;
 };
 
@@ -58,5 +58,21 @@ export const createTest = async (testData) => {
 
 export const submitTest = async (testId, answers) => {
     const response = await axios.post(`/tests/${testId}/submit`, { answers });
+    return response.data;
+};
+
+export const deleteTestAPI = async (id) => {
+    const response = await axios.delete(`/tests/${id}`);
+    return response.data;
+};
+
+export const updateTest = async (id, testData) => {
+    const response = await axios.put(`/tests/${id}`, testData);
+    return response.data;
+};
+
+// Работа с профилем
+export const getProfile = async () => {
+    const response = await axios.get('/profile');
     return response.data;
 };

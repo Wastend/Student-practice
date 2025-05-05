@@ -25,11 +25,12 @@ const getTestById = async (req, res) => {
 
 const createTest = async (req, res) => {
     try {
-        const newTest = await testModel.createTest(req.body);
+        const { job_id, title, description } = req.body;
+        const newTest = await testModel.createTest({ job_id, title, description });
         res.status(201).json(newTest);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error("Ошибка при создании теста:", error);
+        res.status(500).json({ message: "Ошибка сервера" });
     }
 };
 
@@ -52,9 +53,34 @@ const submitTest = async (req, res) => {
     }
 };
 
+const deleteTest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await testModel.deleteTest(id);
+        res.json({ message: "Тест успешно удалён" });
+    } catch (error) {
+        console.error("Ошибка при удалении теста:", error);
+        res.status(500).json({ message: "Ошибка сервера" });
+    }
+};
+
+const updateTest = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description } = req.body;
+        await testModel.updateTest(id, { title, description });
+        res.json({ message: "Тест успешно обновлён" });
+    } catch (error) {
+        console.error("Ошибка при обновлении теста:", error);
+        res.status(500).json({ message: "Ошибка сервера" });
+    }
+};
+
 module.exports = {
     getAllTests,
     getTestById,
     createTest,
     submitTest,
+    deleteTest,
+    updateTest,
 };

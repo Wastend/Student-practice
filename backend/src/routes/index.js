@@ -15,6 +15,7 @@ router.get('/users/:id', userController.getUserById);
 router.post('/users', userController.createUser);
 router.post('/login', userController.loginUser); // Используем метод из userController
 router.post('/register', userController.registerUser);
+router.get('/profile', authenticateToken, userController.getProfile);
 
 // Маршруты для вакансий
 router.get('/jobs', jobController.getAllJobs);
@@ -29,8 +30,10 @@ router.post('/applications', applicationController.createApplication);
 // Маршруты для тестов
 router.get('/tests', testController.getAllTests);
 router.get('/tests/:id', testController.getTestById);
-router.post('/tests', testController.createTest);
+router.post('/tests', authenticateToken, testController.createTest);
 router.post('/tests/:testId/submit', authenticateToken, testController.submitTest);
+router.put('/tests/:id', authenticateToken, testController.updateTest);
+router.delete('/tests/:id', authenticateToken, testController.deleteTest);
 
 // Маршруты для вопросов
 router.get('/tests/:testId/questions', questionController.getQuestionsByTestId);

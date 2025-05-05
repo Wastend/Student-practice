@@ -79,10 +79,24 @@ const registerUser = async (req, res) => {
     }
 };
 
+const getProfile = async (req, res) => {
+    try {
+        const user = await userModel.getUserById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'Пользователь не найден' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Ошибка при получении профиля:', error);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
     createUser,
     loginUser,
     registerUser,
+    getProfile,
 };

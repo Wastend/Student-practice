@@ -2,42 +2,42 @@
   <section class="profile">
     <div class="container">
       <div class="profile-wrap">
-        <Card class="profile-card">
+        <Card v-if="user !== null" class="profile-card">
           <template #content>
             <div class="profile-info">
               <h3>Информация</h3>
               <ul>
-                <li><strong>Имя:</strong> {{ user.name }}</li>
+                <li><strong>Имя:</strong> {{ user.username }}</li>
                 <li><strong>Email:</strong> {{ user.email }}</li>
-                <li v-if="user.role === 'student'">
+                <li v-if="user.role_id === 1">
                   <strong>Роль:</strong> Студент
                 </li>
-                <li v-if="user.role === 'company'">
+                <li v-if="user.role_id === 2">
                   <strong>Роль:</strong> Компания
                 </li>
               </ul>
             </div>
 
-            <div v-if="user.role === 'company'" class="company-info">
+            <div v-if="user.role_id === 2" class="company-info">
               <h3>Информация о компании</h3>
               <ul>
-                <li><strong>Название:</strong> {{ user.companyName }}</li>
+                <li><strong>Название:</strong> {{ user.company_name }}</li>
                 <li>
                   <strong>Веб-сайт: </strong>
-                  <a :href="user.companyWebsite" target="_blank">{{
-                    user.companyWebsite
+                  <a :href="user.company_website" target="_blank">{{
+                    user.company_website
                   }}</a>
                 </li>
                 <li>
-                  <strong>Описание:</strong> {{ user.companyDescription }}
+                  <strong>Описание:</strong> {{ user.company_description }}
                 </li>
               </ul>
             </div>
-            <div v-if="user.role === 'company'" class="vacancies-section">
+            <div v-if="user.role_id === 2" class="vacancies-section">
               <h3>Ваши вакансии</h3>
-              <VacanciesTable />
+              <VacanciesTable :vacancies="vacancies"/>
             </div>
-            <div v-if="user.role === 'company'" class="tests-section">
+            <div v-if="user.role_id === 2" class="tests-section">
               <h3>Ваши тесты</h3>
               <TestsTable
                 :tests="tests"
@@ -45,6 +45,19 @@
                 @deleteTest="deleteTest"
               />
             </div>
+            <div v-if="user.role_id === 2" class="add-test-section">
+              <AddTestForm />
+            </div>
+
+            <div v-if="user.role_id === 1" class="applications-section">
+              <h3>Ваши заявки</h3>
+              <ul>
+                <li v-for="application in applications" :key="application.id">
+                  <strong>{{ application.job_title }}</strong> - {{ application.status }}
+                </li>
+              </ul>
+            </div>
+
             <Button
               label="Выйти из аккаунта"
               class="btn-danger mt-2"
@@ -58,23 +71,40 @@
 </template>
 
 <script setup>
-import TestsTable from "@/components/pages/vacancy/TestsTable.vue";
-import VacanciesTable from "@/components/pages/vacancy/VacanciesTable.vue";
 import { Button, Card } from "primevue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import VacanciesTable from '@/components/pages/vacancy/VacanciesTable.vue'
+import TestsTable from '@/components/pages/vacancy/TestsTable.vue'
+import { getProfile, getJobs, getTests, getApplications, deleteTestAPI } from "@/api";
 
 const router = useRouter();
+const user = ref(null);
+const vacancies = ref([]);
+const tests = ref([]);
+const applications = ref([]);
 
-// Пример данных пользователя
-const user = ref({
-  name: "Иван Иванов",
-  email: "ivan@example.com",
-  role: "company", // "student" или "company"
-  companyName: "TechStart",
-  companyWebsite: "https://techstart.ru",
-  companyDescription:
-    "TechStart — это современная IT-компания, занимающаяся разработкой цифровых продуктов для бизнеса.",
+onMounted(async () => {
+  try {
+    user.value = await getProfile();
+
+    // Если пользователь — работодатель, загружаем его вакансии
+    if (user.value.role_id === 2) {
+      vacancies.value = await getJobs({ employer_id: user.value.id });
+      tests.value = await getTests({ employer_id: user.value.id });
+      console.log(vacancies.value, tests.value);
+      
+    }
+
+    // Если пользователь — студент, загружаем его заявки
+    if (user.value.role_id === 1) {
+      applications.value = await getApplications({ student_id: user.value.id });
+    }
+  } catch (error) {
+    console.error("Ошибка при загрузке профиля:", error);
+    alert("Не удалось загрузить данные профиля");
+    router.push("/login");
+  }
 });
 
 const logout = () => {
@@ -82,25 +112,19 @@ const logout = () => {
   router.push("/login");
 };
 
-const goToCreateVacancy = () => {
-  router.push("/vacancies/create");
-};
-
-const tests = ref([
-  { id: 1, title: "Тест на знание JavaScript" },
-  { id: 2, title: "Тест на аналитическое мышление" },
-]);
-
 const editTest = (id) => {
-  console.log("Редактирование теста с ID:", id);
+  router.push(`/tests/${id}/edit`);
 };
 
-const deleteTest = (id) => {
+const deleteTest = async (id) => {
   if (confirm("Вы уверены, что хотите удалить этот тест?")) {
-    const index = tests.value.findIndex((test) => test.id === id);
-    if (index !== -1) {
-      tests.value.splice(index, 1);
-      alert("Тест удален!");
+    try {
+      await deleteTestAPI(id); // Реализуем API для удаления теста
+      tests.value = tests.value.filter((test) => test.id !== id);
+      alert("Тест удалён!");
+    } catch (error) {
+      console.error("Ошибка при удалении теста:", error);
+      alert("Не удалось удалить тест");
     }
   }
 };
@@ -113,13 +137,6 @@ const deleteTest = (id) => {
 
 .profile-wrap {
   width: 100%;
-}
-
-.profile-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  text-align: center;
 }
 
 .profile-info,
@@ -141,10 +158,6 @@ const deleteTest = (id) => {
   padding: 0;
 }
 
-.tests-section {
-  margin-top: 2rem;
-}
-
 .profile-info li,
 .company-info li {
   margin-bottom: 0.5rem;
@@ -157,5 +170,25 @@ const deleteTest = (id) => {
 
 .btn-danger:hover {
   background-color: darken(var(--danger-color), 10%);
+}
+
+.vacancies {
+  margin-top: 2rem;
+}
+
+.vacancies h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.vacancies ul {
+  list-style: none;
+  padding: 0;
+}
+
+.vacancies li {
+  margin-bottom: 0.5rem;
 }
 </style>

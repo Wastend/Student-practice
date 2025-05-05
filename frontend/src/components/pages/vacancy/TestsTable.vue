@@ -42,16 +42,16 @@ const props = defineProps({
 
 const emit = defineEmits(["deleteTest", "editTest"]);
 
-const goToCreateTest = () => {
-  router.push("/tests/create");
-};
-
 const editTest = (id) => {
-  emit("editTest", id);
+  router.push(`/tests/${id}/edit`);
 };
 
 const deleteTest = (id) => {
   emit("deleteTest", id);
+};
+
+const goToCreateTest = () => {
+  router.push("/tests/create");
 };
 </script>
 

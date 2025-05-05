@@ -1,6 +1,23 @@
 <template>
   <div class="vacancies-table">
     <DataTable :value="vacancies" class="p-datatable-gridlines">
+      <template #empty>
+        <div>
+          <div
+            v-for="r in 3"
+            :key="r"
+            class="table-skeleton-row"
+          >
+            <div
+              v-for="c in 4"
+              :key="c"
+              class="table-skeleton-column"
+            >
+              <Skeleton />
+            </div>
+          </div>
+        </div>
+      </template>
       <Column field="title" header="Название" />
       <Column field="location" header="Локация" />
       <Column field="status" header="Статус" />
@@ -41,25 +58,20 @@
 
 <script setup>
 import { Button, Column, DataTable } from "primevue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import Skeleton from 'primevue/skeleton';
+
+const props = defineProps({
+  vacancies: {
+    type: Array,
+    required: true,
+  },
+});
+
+const vacancies = ref(props.vacancies)
 
 const router = useRouter();
-
-const vacancies = ref([
-  {
-    id: 1,
-    title: "Стажировка в IT-компании",
-    location: "Москва",
-    status: "Опубликована",
-  },
-  {
-    id: 2,
-    title: "Аналитик данных",
-    location: "Санкт-Петербург",
-    status: "Черновик",
-  },
-]);
 
 const editVacancy = (id) => {
   router.push(`/vacancies/${id}/edit`);
@@ -89,6 +101,12 @@ const togglePublish = (id) => {
     );
   }
 };
+
+watch(
+  () => props.vacancies,
+  () => vacancies.value = props.vacancies
+)
+
 </script>
 
 <style scoped>

@@ -90,10 +90,12 @@
 
 <script setup>
 import { Button, Card, Checkbox, InputText } from "primevue";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { createTest, getTestById, updateTest } from "@/api";
 
 const router = useRouter();
+const route = useRoute();
 
 const test = ref({
   title: "",
@@ -106,6 +108,22 @@ const test = ref({
       ],
     },
   ],
+});
+
+const isEditing = ref(false);
+
+onMounted(async () => {
+    const testId = route.params.id;
+    if (testId) {
+        isEditing.value = true;
+        try {
+            test.value = await getTestById(testId);
+        } catch (error) {
+            console.error("Ошибка при загрузке теста:", error);
+            alert("Не удалось загрузить тест");
+            router.push("/profile");
+        }
+    }
 });
 
 const addQuestion = () => {
@@ -133,10 +151,20 @@ const removeAnswer = (questionIndex, answerIndex) => {
   test.value.questions[questionIndex].answers.splice(answerIndex, 1);
 };
 
-const handleSubmit = () => {
-  console.log("Тест сохранен:", test.value);
-  alert("Тест успешно сохранен!");
-  router.push("/profile");
+const handleSubmit = async () => {
+    try {
+        if (isEditing.value) {
+            await updateTest(route.params.id, test.value);
+            alert("Тест успешно обновлён!");
+        } else {
+            await createTest(test.value);
+            alert("Тест успешно создан!");
+        }
+        router.push("/profile");
+    } catch (error) {
+        console.error("Ошибка при сохранении теста:", error);
+        alert("Не удалось сохранить тест");
+    }
 };
 </script>
 

@@ -13,7 +13,7 @@ const getTestById = async (id) => {
 const createTest = async (test) => {
     const { job_id, title, description } = test;
     const [result] = await pool.query(
-        'INSERT INTO tests (job_id, title, description) VALUES (?, ?, ?)',
+        "INSERT INTO tests (job_id, title, description) VALUES (?, ?, ?)",
         [job_id, title, description]
     );
     return { id: result.insertId, ...test };
@@ -28,9 +28,25 @@ const saveTestResult = async (result) => {
     return rows;
 };
 
+const deleteTest = async (id) => {
+    const [result] = await pool.query("DELETE FROM tests WHERE id = ?", [id]);
+    return result;
+};
+
+const updateTest = async (id, test) => {
+    const { title, description } = test;
+    const [result] = await pool.query(
+        "UPDATE tests SET title = ?, description = ? WHERE id = ?",
+        [title, description, id]
+    );
+    return result;
+};
+
 module.exports = {
     getAllTests,
     getTestById,
-    createTest,
     saveTestResult,
+    deleteTest,
+    createTest,
+    updateTest,
 };
