@@ -62,7 +62,7 @@ const loginUser = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-    const { username, email, password, role_id } = req.body;
+    const { username, email, password, role_id, company_name, company_website, company_description } = req.body;
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -71,6 +71,9 @@ const registerUser = async (req, res) => {
             email,
             password: hashedPassword,
             role_id,
+            company_name: company_name || null,
+            company_website: company_website || null,
+            company_description: company_description || null,
         });
         res.status(201).json(newUser);
     } catch (error) {
@@ -92,6 +95,23 @@ const getProfile = async (req, res) => {
     }
 };
 
+const updateProfile = async (req, res) => {
+    try {
+        const { username, email, company_name, company_website, company_description } = req.body;
+        const updatedUser = await userModel.updateUser(req.user.id, {
+            username,
+            email,
+            company_name,
+            company_website,
+            company_description,
+        });
+        res.json(updatedUser);
+    } catch (error) {
+        console.error("Ошибка при обновлении профиля:", error);
+        res.status(500).json({ message: "Ошибка сервера" });
+    }
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -99,4 +119,5 @@ module.exports = {
     loginUser,
     registerUser,
     getProfile,
+    updateProfile,
 };

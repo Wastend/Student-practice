@@ -32,8 +32,24 @@ const createJob = async (job) => {
     return { id: result.insertId, ...job };
 };
 
+const updateJob = async (id, job) => {
+    const { title, description, category, location, remote, salary, deadline, testId } = job;
+    const [result] = await pool.query(
+        'UPDATE jobs SET title = ?, description = ?, category = ?, location = ?, remote = ?, salary = ?, deadline = ?, test_id = ? WHERE id = ?',
+        [title, description, category, location, remote, salary, deadline, testId, id]
+    );
+    return result;
+};
+
+const deleteJob = async (id) => {
+    const [result] = await pool.query('DELETE FROM jobs WHERE id = ?', [id]);
+    return result;
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
     createJob,
+    updateJob,
+    deleteJob,
 };

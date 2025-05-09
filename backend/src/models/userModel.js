@@ -11,12 +11,21 @@ const getUserById = async (id) => {
 };
 
 const createUser = async (user) => {
-    const { username, email, password, role_id } = user;
+    const { username, email, password, role_id, company_name, company_website, company_description } = user;
     const [result] = await pool.query(
-        'INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, ?)',
-        [username, email, password, role_id]
+        'INSERT INTO users (username, email, password, role_id, company_name, company_website, company_description) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [username, email, password, role_id, company_name, company_website, company_description]
     );
     return { id: result.insertId, ...user };
+};
+
+const updateUser = async (id, user) => {
+    const { username, email, company_name, company_website, company_description } = user;
+    const [result] = await pool.query(
+        'UPDATE users SET username = ?, email = ?, company_name = ?, company_website = ?, company_description = ? WHERE id = ?',
+        [username, email, company_name, company_website, company_description, id]
+    );
+    return { id, ...user };
 };
 
 const getUserByEmail = async (email) => {
@@ -28,5 +37,6 @@ module.exports = {
     getAllUsers,
     getUserById,
     createUser,
+    updateUser,
     getUserByEmail,
 };

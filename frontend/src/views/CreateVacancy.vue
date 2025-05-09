@@ -57,8 +57,6 @@
                   id="remote"
                   v-model="vacancy.remote"
                   binary
-                  true-value="Да"
-                  false-value="Нет"
                 />
               </div>
 
@@ -87,7 +85,9 @@ import {
 } from "primevue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { createJob } from "@/api";
+import { createJob, updateJob } from "@/api";
+import { getTests } from "@/api";
+import { getJobById } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
@@ -100,36 +100,58 @@ const vacancy = ref({
   remote: false,
 });
 
-const tests = ref([
-  { id: 1, title: "Тест на знание JavaScript" },
-  { id: 2, title: "Тест на аналитическое мышление" },
-]);
+const tests = ref([]);
 
 const isEditing = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    tests.value = await getTests(); // Загружаем тесты
+  } catch (error) {
+    console.error("Ошибка при загрузке тестов:", error);
+    alert("Не удалось загрузить тесты");
+  }
+
   const vacancyId = route.params.id;
   if (vacancyId) {
     isEditing.value = true;
-    // Пример загрузки данных вакансии
-    vacancy.value = {
-      title: "Пример вакансии",
-      description: "Описание вакансии",
-      testId: 1,
-      location: "Москва",
-      remote: true,
-    };
+    try {
+      const vacancyData = await getJobById(vacancyId); // Загружаем данные вакансии
+      vacancy.value = {
+        title: vacancyData.title,
+        description: vacancyData.description,
+        testId: tests.value.find((test) => test.id === vacancyData.test_id) || null, // Находим объект теста
+        location: vacancyData.location,
+        remote: !!vacancyData.remote, // Преобразуем в булевое значение
+      };
+    } catch (error) {
+      console.error("Ошибка при загрузке вакансии:", error);
+      alert("Не удалось загрузить данные вакансии");
+      router.push("/profile");
+    }
   }
 });
 
 const handleSubmit = async () => {
   try {
-    await createJob(vacancy.value);
-    alert("Вакансия успешно создана!");
+    const payload = {
+      ...vacancy.value,
+      testId: vacancy.value.testId?.id || null, // Отправляем только ID теста
+      remote: vacancy.value.remote ? 1 : 0, // Преобразуем в числовое значение
+    };
+
+    if (isEditing.value) {
+      await updateJob(route.params.id, payload); // Обновляем вакансию
+      alert("Вакансия успешно обновлена!");
+    } else {
+      await createJob(payload); // Создаём новую вакансию
+      alert("Вакансия успешно создана!");
+    }
+
     router.push("/profile");
   } catch (error) {
-    console.error("Ошибка при создании вакансии:", error);
-    alert("Ошибка при создании вакансии");
+    console.error("Ошибка при сохранении вакансии:", error);
+    alert("Ошибка при сохранении вакансии");
   }
 };
 

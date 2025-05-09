@@ -47,6 +47,11 @@ const routes = [
     component: CreateTest,
   },
   {
+    path: "/tests/:id/edit",
+    name: "Edit Test",
+    component: CreateTest,
+  },
+  {
     path: "/login",
     name: "Login",
     component: Login,

@@ -81,12 +81,12 @@ const companyDescription = ref("");
 const router = useRouter();
 
 const handleRegister = async () => {
-    try {
+    try {        
         const userData = {
             username: email.value.split("@")[0],
             email: email.value,
             password: password.value,
-            role_id: role.value === "student" ? 1 : 2,
+            role_id: role.value.value === "student" ? 1 : 2,
             company_name: companyName.value || null,
             company_website: companyWebsite.value || null,
             company_description: companyDescription.value || null,

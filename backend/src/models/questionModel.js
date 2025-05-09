@@ -14,7 +14,23 @@ const createQuestion = async (question) => {
     return { id: result.insertId, ...question };
 };
 
+const updateQuestion = async (id, question) => {
+    const { text } = question;
+    const [result] = await pool.query(
+        'UPDATE test_questions SET text = ? WHERE id = ?',
+        [text, id]
+    );
+    return result;
+};
+
+const deleteQuestion = async (id) => {
+    const [result] = await pool.query('DELETE FROM test_questions WHERE id = ?', [id]);
+    return result;
+};
+
 module.exports = {
     getQuestionsByTestId,
     createQuestion,
+    updateQuestion,
+    deleteQuestion,
 };

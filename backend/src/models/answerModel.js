@@ -14,7 +14,23 @@ const createAnswer = async (answer) => {
     return { id: result.insertId, ...answer };
 };
 
+const updateAnswer = async (id, answer) => {
+    const { text, is_correct } = answer;
+    const [result] = await pool.query(
+        'UPDATE test_answers SET text = ?, is_correct = ? WHERE id = ?',
+        [text, is_correct, id]
+    );
+    return result;
+};
+ 
+const deleteAnswer = async (id) => {
+    const [result] = await pool.query('DELETE FROM test_answers WHERE id = ?', [id]);
+    return result;
+};
+
 module.exports = {
     getAnswersByQuestionId,
     createAnswer,
+    updateAnswer,
+    deleteAnswer,
 };

@@ -1,24 +1,29 @@
 <template>
   <div class="tests-table">
-    <DataTable :value="tests" class="p-datatable-gridlines">
-      <Column field="title" header="Название теста" />
-      <Column header="Действия">
-        <template #body="slotProps">
-          <div class="actions">
-            <Button
-              label="Редактировать"
-              class="p-button-text p-button-primary"
-              @click="editTest(slotProps.data.id)"
-            />
-            <Button
-              label="Удалить"
-              class="p-button-text p-button-danger"
-              @click="deleteTest(slotProps.data.id)"
-            />
-          </div>
-        </template>
-      </Column>
-    </DataTable>
+    <template v-if="tests.length > 0">
+      <DataTable :value="tests" class="p-datatable-gridlines">
+        <Column field="title" header="Название теста" />
+        <Column header="Действия">
+          <template #body="slotProps">
+            <div class="actions">
+              <Button
+                label="Редактировать"
+                class="p-button-text p-button-primary"
+                @click="editTest(slotProps.data.id)"
+              />
+              <Button
+                label="Удалить"
+                class="p-button-text p-button-danger"
+                @click="deleteTest(slotProps.data.id)"
+              />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </template>
+    <template v-else>
+      <p class="no-data">Тесты еще не добавлены.</p>
+    </template>
     <Button
       label="Создать новый тест"
       class="btn-primary mt-2"
@@ -63,5 +68,12 @@ const goToCreateTest = () => {
 
 .btn-primary {
   margin-top: 1rem;
+}
+
+.no-data {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--secondary-color);
+  margin: 1rem 0;
 }
 </style>

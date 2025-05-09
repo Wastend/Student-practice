@@ -29,6 +29,18 @@ export const createJob = async (jobData) => {
     return response.data;
 };
 
+export const updateJob = async (id, jobData) => {
+    const response = await axios.put(`/jobs/${id}`, jobData);
+    return response.data;
+};
+
+export const deleteJob = async (id) => {
+    console.log(123);
+    
+    const response = await axios.delete(`/jobs/${id}`);
+    return response.data;
+};
+
 // Работа с заявками
 export const getApplications = async (filters = {}) => {
     const response = await axios.get("/applications", { params: filters });
@@ -41,8 +53,8 @@ export const createApplication = async (applicationData) => {
 };
 
 // Работа с тестами
-export const getTests = async (filters = {}) => {
-    const response = await axios.get("/tests", { params: filters });
+export const getTests = async () => {
+    const response = await axios.get("/tests");
     return response.data;
 };
 
@@ -71,8 +83,43 @@ export const updateTest = async (id, testData) => {
     return response.data;
 };
 
+export const getQuestionsWithAnswers = async (testId) => {
+    const response = await axios.get(`/tests/${testId}/questions-with-answers`);
+    return response.data;
+};
+
+export const updateQuestionsAndAnswers = async (testId, questions) => {
+    const response = await axios.put(`/tests/${testId}/questions`, { questions });
+    return response.data;
+};
+
 // Работа с профилем
 export const getProfile = async () => {
     const response = await axios.get('/profile');
+    return response.data;
+};
+
+export const updateProfile = async (profileData) => {
+    const response = await axios.put("/profile", profileData);
+    return response.data;
+};
+
+export const createQuestion = async (testId, questionData) => {
+    const response = await axios.post(`/tests/${testId}/questions`, questionData);
+    return response.data;
+};
+
+export const createAnswer = async (questionId, answerData) => {
+    const response = await axios.post(`/questions/${questionId}/answers`, answerData);
+    return response.data;
+};
+
+export const deleteQuestion = async (id) => {
+    const response = await axios.delete(`/questions/${id}`);
+    return response.data;
+};
+
+export const deleteAnswer = async (id) => {
+    const response = await axios.delete(`/answers/${id}`);
     return response.data;
 };

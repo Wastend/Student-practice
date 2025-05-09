@@ -44,8 +44,6 @@
                     <Checkbox
                       v-model="answer.isCorrect"
                       binary
-                      true-value="true"
-                      false-value="false"
                       :label="'Правильный ответ'"
                     />
                     <Button
@@ -92,7 +90,7 @@
 import { Button, Card, Checkbox, InputText } from "primevue";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { createTest, getTestById, updateTest } from "@/api";
+import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
@@ -118,9 +116,19 @@ onMounted(async () => {
         isEditing.value = true;
         try {
             test.value = await getTestById(testId);
+            const questionsWithAnswers = await getQuestionsWithAnswers(testId);
+
+            // Преобразуем is_correct в булевое значение
+            test.value.questions = questionsWithAnswers.map((question) => ({
+                ...question,
+                answers: question.answers.map((answer) => ({
+                    ...answer,
+                    isCorrect: !!answer.is_correct, // Преобразуем в true/false
+                })),
+            }));
         } catch (error) {
             console.error("Ошибка при загрузке теста:", error);
-            alert("Не удалось загрузить тест");
+            alert("Тест не найден или у вас нет доступа");
             router.push("/profile");
         }
     }
@@ -136,8 +144,18 @@ const addQuestion = () => {
   });
 };
 
-const removeQuestion = (index) => {
-  test.value.questions.splice(index, 1);
+const removeQuestion = async (index) => {
+    const question = test.value.questions[index];
+    if (question.id) {
+        try {
+            await deleteQuestion(question.id); // Удаляем вопрос из базы
+        } catch (error) {
+            console.error('Ошибка при удалении вопроса:', error);
+            alert('Не удалось удалить вопрос');
+            return;
+        }
+    }
+    test.value.questions.splice(index, 1); // Удаляем вопрос из списка
 };
 
 const addAnswer = (questionIndex) => {
@@ -147,24 +165,61 @@ const addAnswer = (questionIndex) => {
   });
 };
 
-const removeAnswer = (questionIndex, answerIndex) => {
-  test.value.questions[questionIndex].answers.splice(answerIndex, 1);
+const removeAnswer = async (questionIndex, answerIndex) => {
+    const answer = test.value.questions[questionIndex].answers[answerIndex];
+    if (answer.id) {
+        try {
+            await deleteAnswer(answer.id); // Удаляем ответ из базы
+        } catch (error) {
+            console.error('Ошибка при удалении ответа:', error);
+            alert('Не удалось удалить ответ');
+            return;
+        }
+    }
+    test.value.questions[questionIndex].answers.splice(answerIndex, 1); // Удаляем ответ из списка
 };
 
 const handleSubmit = async () => {
     try {
+        let testId;
+
         if (isEditing.value) {
-            await updateTest(route.params.id, test.value);
+            await updateTest(route.params.id, { title: test.value.title });
+            testId = route.params.id;
             alert("Тест успешно обновлён!");
         } else {
-            await createTest(test.value);
+            const createdTest = await createTest({ title: test.value.title });
+            testId = createdTest.id;
             alert("Тест успешно создан!");
         }
+
+        // Преобразуем ответы перед отправкой
+        const questions = test.value.questions.map((question) => ({
+            ...question,
+            answers: question.answers.map((answer) => ({
+                ...answer,
+                isCorrect: answer.isCorrect ? 1 : 0, // Преобразуем в 0 или 1
+            })),
+        }));
+
+        // Обновляем вопросы и ответы
+        await updateQuestionsAndAnswers(testId, questions);
+
         router.push("/profile");
     } catch (error) {
         console.error("Ошибка при сохранении теста:", error);
         alert("Не удалось сохранить тест");
     }
+};
+
+const handleAddQuestion = async (testId, question) => {
+    const newQuestion = await createQuestion(testId, question);
+    console.log("Вопрос добавлен:", newQuestion);
+};
+
+const handleAddAnswer = async (questionId, answer) => {
+    const newAnswer = await createAnswer(questionId, answer);
+    console.log("Ответ добавлен:", newAnswer);
 };
 </script>
 

@@ -1,6 +1,6 @@
 -- Создание базы данных
-CREATE DATABASE student_practice_platform;
-USE student_practice_platform;
+CREATE DATABASE student_practice;
+USE student_practice;
 
 -- Таблица ролей
 CREATE TABLE roles (
@@ -23,6 +23,16 @@ CREATE TABLE users (
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
+-- Таблица тестов
+CREATE TABLE tests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employer_id INT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Таблица вакансий
 CREATE TABLE jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,9 +43,11 @@ CREATE TABLE jobs (
     remote BOOLEAN DEFAULT FALSE,
     salary DECIMAL(10, 2),
     employer_id INT NOT NULL,
+    test_id INT DEFAULT NULL, -- Связь с тестом (может быть NULL)
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deadline DATE,
-    FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE SET NULL
 );
 
 -- Таблица заявок
@@ -47,16 +59,6 @@ CREATE TABLE applications (
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- Таблица тестов
-CREATE TABLE tests (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    job_id INT NOT NULL,
-    title VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
 -- Таблица вопросов тестов

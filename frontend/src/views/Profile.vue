@@ -16,6 +16,7 @@
                   <strong>Роль:</strong> Компания
                 </li>
               </ul>
+              <Button label="Редактировать профиль" class="btn-primary mt-2" @click="showEditPopup = true" />
             </div>
 
             <div v-if="user.role_id === 2" class="company-info">
@@ -35,7 +36,7 @@
             </div>
             <div v-if="user.role_id === 2" class="vacancies-section">
               <h3>Ваши вакансии</h3>
-              <VacanciesTable :vacancies="vacancies"/>
+              <VacanciesTable :vacancies="vacancies" :vacancy-delete="deleteVacancy" />
             </div>
             <div v-if="user.role_id === 2" class="tests-section">
               <h3>Ваши тесты</h3>
@@ -67,33 +68,72 @@
         </Card>
       </div>
     </div>
+
+    <!-- Попап для редактирования профиля -->
+    <Dialog v-model:visible="showEditPopup" header="Редактирование профиля" :modal="true" :closable="true">
+      <form @submit.prevent="handleEditProfile">
+        <div class="form-group">
+          <label for="username">Имя</label>
+          <InputText id="username" v-model="editForm.username" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <InputText id="email" v-model="editForm.email" required />
+        </div>
+        <div v-if="user.role_id === 2" class="form-group">
+          <label for="companyName">Название компании</label>
+          <InputText id="companyName" v-model="editForm.company_name" />
+        </div>
+        <div v-if="user.role_id === 2" class="form-group">
+          <label for="companyWebsite">Веб-сайт компании</label>
+          <InputText id="companyWebsite" v-model="editForm.company_website" />
+        </div>
+        <div v-if="user.role_id === 2" class="form-group">
+          <label for="companyDescription">Описание компании</label>
+          <Textarea id="companyDescription" v-model="editForm.company_description" rows="3" />
+        </div>
+        <Button label="Сохранить" class="btn-primary mt-2" type="submit" />
+      </form>
+    </Dialog>
   </section>
 </template>
 
 <script setup>
-import { Button, Card } from "primevue";
+import { Button, Card, Dialog, InputText, Textarea } from "primevue";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import VacanciesTable from '@/components/pages/vacancy/VacanciesTable.vue'
 import TestsTable from '@/components/pages/vacancy/TestsTable.vue'
-import { getProfile, getJobs, getTests, getApplications, deleteTestAPI } from "@/api";
+import { getProfile, updateProfile, getJobs, getTests, getApplications, deleteTestAPI, deleteJob } from "@/api";
 
 const router = useRouter();
 const user = ref(null);
 const vacancies = ref([]);
 const tests = ref([]);
 const applications = ref([]);
+const showEditPopup = ref(false);
+const editForm = ref({
+  username: "",
+  email: "",
+  company_name: "",
+  company_website: "",
+  company_description: "",
+});
 
 onMounted(async () => {
   try {
     user.value = await getProfile();
+    Object.assign(editForm.value, user.value);
 
     // Если пользователь — работодатель, загружаем его вакансии
     if (user.value.role_id === 2) {
       vacancies.value = await getJobs({ employer_id: user.value.id });
-      tests.value = await getTests({ employer_id: user.value.id });
-      console.log(vacancies.value, tests.value);
-      
+      try {
+        tests.value = await getTests({ employer_id: user.value.id });
+      } catch (error) {
+        console.error("Ошибка при загрузке тестов:", error);
+        tests.value = []; // Устанавливаем пустой массив, если произошла ошибка
+      }
     }
 
     // Если пользователь — студент, загружаем его заявки
@@ -126,6 +166,28 @@ const deleteTest = async (id) => {
       console.error("Ошибка при удалении теста:", error);
       alert("Не удалось удалить тест");
     }
+  }
+};
+
+const deleteVacancy = async (id) => {
+  try {
+    await deleteJob(id); // Вызываем API для удаления вакансии
+    vacancies.value = vacancies.value.filter((vacancy) => vacancy.id !== id); // Удаляем из списка
+  } catch (error) {
+    console.error("Ошибка при удалении вакансии:", error);
+    alert("Не удалось удалить вакансию");
+  }
+};
+
+const handleEditProfile = async () => {
+  try {
+    const updatedUser = await updateProfile(editForm.value);
+    user.value = updatedUser;
+    showEditPopup.value = false;
+    alert("Профиль успешно обновлён!");
+  } catch (error) {
+    console.error("Ошибка при обновлении профиля:", error);
+    alert("Не удалось обновить профиль");
   }
 };
 </script>
@@ -190,5 +252,9 @@ const deleteTest = async (id) => {
 
 .vacancies li {
   margin-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
 }
 </style>
