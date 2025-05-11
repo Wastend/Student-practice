@@ -126,3 +126,24 @@ export const deleteAnswer = async (id) => {
     const response = await axios.delete(`/answers/${id}`);
     return response.data;
 };
+
+// Работа с тегами
+export const getTags = async () => {
+    const response = await axios.get("/tags");
+    return response.data;
+};
+
+export const createTag = async (tagData) => {
+    const response = await axios.post("/tags", tagData);
+    return response.data;
+};
+
+export const updateTag = async (id, tagData) => {
+    const response = await axios.put(`/tags/${id}`, tagData);
+    return response.data;
+};
+
+export const deleteTag = async (id) => {
+    const response = await axios.delete(`/tags/${id}`);
+    return response.data;
+};

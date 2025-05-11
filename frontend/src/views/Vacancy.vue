@@ -1,111 +1,66 @@
 <template>
-  <div v-if="loading" class="loader">Загрузка...</div>
-  <div v-else>
-    <div class="breadcrumbs">
-      <div class="container">
-        <div class="breadcrumbs-wrap">
-          <Breadcrumb :home="home" :model="breadcrumbs" />
-        </div>
-      </div>
+  <div class="vacancy-page">
+    <div class="vacancy-content">
+      <VacancyHeader :title="vacancy.title" :category="vacancy.category" :location="vacancy.location" :company="company"
+        :description="vacancy.description" :responsibilities="vacancy.responsibilities"
+        :requirements="vacancy.requirements" :salary="vacancy.salary" :remote="vacancy.remote"
+        :test_id="vacancy.test_id" :tags="vacancy.tags" :work_schedule="vacancy.work_schedule"
+        :employment_type="vacancy.employment_type" :experience_level="vacancy.experience_level"
+        :education_level="vacancy.education_level" :benefits="vacancy.benefits" />
+      <VacancyInfo 
+        :responsibilities="vacancy.responsibilities" 
+        :requirements="vacancy.requirements" 
+        :conditions="{
+          mentor_support: vacancy.mentor_support,
+          certificate: vacancy.certificate,
+          possibility_of_employment: vacancy.possibility_of_employment,
+          paid: vacancy.paid
+        }" 
+      />
     </div>
-    <VacancyHeader
-      :title="vacancy.title"
-      :category="vacancy.category || 'IT'"
-      :location="vacancy.location || 'Не указано'"
-      :company="{ name: vacancy.company_name || 'Не указано', description: vacancy.company_description || '', website: vacancy.company_website || '' }"
-      :description="vacancy.description"
-      :testId="vacancy.test_id"
-    />
-    <VacancyInfo
-      :responsibilities="[
-        'Участие в разработке и поддержке веб-приложений',
-        'Верстка пользовательских интерфейсов (HTML, CSS)',
-        'Работа с JavaScript и библиотеками (например, Vue.js или React)',
-        'Тестирование и отладка кода',
-        'Участие в командных встречах и планировании задач'
-      ]"
-      :requirements="[
-        'Базовые знания HTML, CSS, JavaScript',
-        'Желание развиваться в сфере веб-разработки',
-        'Ответственность и готовность учиться',
-        'Умение работать в команде',
-        'Будет плюсом: знание одного из фреймворков (Vue, React), опыт с Git'
-      ]"
-      :conditions="{
-        duration: '3 месяца',
-        schedule: 'Гибкий график (возможность совмещать с учёбой)',
-        mentorSupport: true,
-        certificate: true,
-        possibilityOfEmployment: true,
-        paid: vacancy.salary > 0
-      }"
-    />
-    <FAQBlock />
   </div>
 </template>
+
 <script setup>
-import FAQBlock from "@/components/pages/homepage/FAQBlock.vue";
-import VacancyHeader from "@/components/pages/vacancy/VacancyHeader.vue";
-import VacancyInfo from "@/components/pages/vacancy/VacancyInfo.vue";
-import { Breadcrumb } from "primevue";
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { getJobById } from "@/api";
+  import { ref, onMounted } from "vue";
+  import { useRoute } from "vue-router";
+  import VacancyHeader from "@/components/pages/vacancy/VacancyHeader.vue";
+  import VacancyInfo from "@/components/pages/vacancy/VacancyInfo.vue";
+  import axios from "axios";
 
-const route = useRoute();
-const router = useRouter();
-const vacancy = ref(null);
-const loading = ref(true);
+  const route = useRoute();
+  const vacancy = ref({});
+  const company = ref({});
 
-const home = ref({
-  icon: "pi pi-home",
-  route: "/",
-});
+  const fetchVacancy = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/jobs/${route.params.id}`);
+      vacancy.value = response.data;
+      console.log('Данные вакансии:', vacancy.value);
 
-const breadcrumbs = ref([]);
+      // Получаем информацию о компании
+      if (vacancy.value.employer_id) {
+        const companyResponse = await axios.get(`http://localhost:3000/api/users/${vacancy.value.employer_id}`);
+        company.value = companyResponse.data;
+      }
+    } catch (error) {
+      console.error("Ошибка при загрузке вакансии:", error);
+    }
+  };
 
-onMounted(async () => {
-  try {
-    const vacancyId = route.params.id;
-    vacancy.value = await getJobById(vacancyId);
-
-    // Устанавливаем хлебные крошки
-    breadcrumbs.value = [
-      { label: "Вакансии", route: "/vacancies" },
-      { label: vacancy.value.title },
-    ];
-  } catch (error) {
-    console.error("Ошибка при загрузке вакансии:", error);
-    alert("Не удалось загрузить данные вакансии");
-  } finally {
-    loading.value = false;
-  }
-});
+  onMounted(() => {
+    fetchVacancy();
+  });
 </script>
-<style>
-.breadcrumbs {
-  width: 100%;
-}
 
-.breadcrumbs-wrap {
-  display: flex;
-  width: 100%;
-}
+<style scoped>
+  .vacancy-page {
+    padding: 2rem 0;
+  }
 
-.p-breadcrumb {
-  background-color: transparent !important;
-  margin-top: -40px;
-}
-
-.p-breadcrumb-item,
-.p-breadcrumb-item span {
-  transition-duration: 0.3s;
-  transition-timing-function: ease-in-out;
-  color: var(--text-color);
-}
-
-.p-breadcrumb-item:hover,
-.p-breadcrumb-item span:hover {
-  color: var(--primary-color);
-}
+  .vacancy-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
 </style>

@@ -43,11 +43,34 @@ CREATE TABLE jobs (
     remote BOOLEAN DEFAULT FALSE,
     salary DECIMAL(10, 2),
     employer_id INT NOT NULL,
-    test_id INT DEFAULT NULL, -- Связь с тестом (может быть NULL)
+    test_id INT DEFAULT NULL,
     posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deadline DATE,
+    work_schedule VARCHAR(50),
+    employment_type VARCHAR(50),
+    experience_level VARCHAR(50),
+    education_level VARCHAR(50),
+    benefits TEXT,
     FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE SET NULL
+);
+
+-- Таблица обязанностей вакансии
+CREATE TABLE job_responsibilities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id INT NOT NULL,
+    text TEXT NOT NULL,
+    order_index INT NOT NULL,
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
+);
+
+-- Таблица требований вакансии
+CREATE TABLE job_requirements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id INT NOT NULL,
+    text TEXT NOT NULL,
+    order_index INT NOT NULL,
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
 -- Таблица заявок

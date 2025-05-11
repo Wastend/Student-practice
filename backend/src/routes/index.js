@@ -8,6 +8,10 @@ const questionController = require('../controllers/questionController');
 const answerController = require('../controllers/answerController');
 const jwt = require('jsonwebtoken');
 const { authenticateToken, authorizeRole } = require("../middlewares/authMiddleware");
+const authRoutes = require('./authRoutes');
+const jobRoutes = require('./jobRoutes');
+const testRoutes = require('./testRoutes');
+const tagRoutes = require('./tagRoutes');
 
 // Маршруты для пользователей
 router.get('/users', userController.getAllUsers);
@@ -61,5 +65,10 @@ router.get('/protected', authenticateToken, (req, res) => {
 router.get('/', (req, res) => {
     res.send('API is working!');
 });
+
+router.use('/auth', authRoutes);
+router.use('/jobs', jobRoutes);
+router.use('/tests', testRoutes);
+router.use('/tags', tagRoutes);
 
 module.exports = router;
