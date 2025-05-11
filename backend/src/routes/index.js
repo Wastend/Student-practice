@@ -7,7 +7,7 @@ const testController = require('../controllers/testController');
 const questionController = require('../controllers/questionController');
 const answerController = require('../controllers/answerController');
 const jwt = require('jsonwebtoken');
-const authenticateToken = require('../middlewares/authMiddleware');
+const { authenticateToken, authorizeRole } = require("../middlewares/authMiddleware");
 
 // Маршруты для пользователей
 router.get('/users', userController.getAllUsers);
@@ -33,11 +33,14 @@ router.post('/applications', applicationController.createApplication);
 
 // Маршруты для тестов
 router.get('/tests', authenticateToken, testController.getAllTests);
-router.get('/tests/:id', authenticateToken, testController.getTestById);
+router.get('/tests/:id', testController.getTestById);
 router.post('/tests', authenticateToken, testController.createTest);
 router.post('/tests/:testId/submit', authenticateToken, testController.submitTest);
+router.post('/tests/:id/submit', authenticateToken, testController.submitTest);
 router.put('/tests/:id', authenticateToken, testController.updateTest);
 router.delete('/tests/:id', authenticateToken, testController.deleteTest);
+router.get('/tests/:id/take', authenticateToken, testController.takeTest);
+router.post('/tests/:id/submit', authenticateToken, testController.submitTest);
 
 // Маршруты для вопросов
 router.get('/tests/:testId/questions', questionController.getQuestionsByTestId);

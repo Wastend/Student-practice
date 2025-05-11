@@ -20,6 +20,11 @@
               <h2 class="description-title">Описание</h2>
               <p class="description-text">{{ description }}</p>
             </div>
+            <Button
+              label="Пройти тест"
+              class="btn-primary mt-2"
+              @click="goToTest"
+            />
           </template>
         </Card>
       </div>
@@ -28,7 +33,10 @@
 </template>
 
 <script setup>
-import { Card, Tag } from "primevue";
+import { Card, Tag, Button } from "primevue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   title: String,
@@ -36,12 +44,16 @@ const props = defineProps({
   location: String,
   company: Object,
   description: String,
+  testId: [String, Number], // Принимаем testId
 });
+
+const goToTest = () => {
+  router.push(`/tests/${props.testId}/take`);
+};
 </script>
 
 <style scoped>
-.vacancy-header,
-.vacancy-header-wrap {
+.vacancy-header,.vacancy-header-wrap {
   width: 100%;
 }
 

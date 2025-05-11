@@ -14,6 +14,7 @@
       :location="vacancy.location || 'Не указано'"
       :company="{ name: vacancy.company_name || 'Не указано', description: vacancy.company_description || '', website: vacancy.company_website || '' }"
       :description="vacancy.description"
+      :testId="vacancy.test_id"
     />
     <VacancyInfo
       :responsibilities="[
@@ -48,10 +49,11 @@ import VacancyHeader from "@/components/pages/vacancy/VacancyHeader.vue";
 import VacancyInfo from "@/components/pages/vacancy/VacancyInfo.vue";
 import { Breadcrumb } from "primevue";
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { getJobById } from "@/api";
 
 const route = useRoute();
+const router = useRouter();
 const vacancy = ref(null);
 const loading = ref(true);
 

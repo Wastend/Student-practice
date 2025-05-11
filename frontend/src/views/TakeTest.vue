@@ -16,7 +16,7 @@
             </div>
             <button type="submit">Отправить</button>
         </form>
-        <div v-if="user.role_id === 1" class="test-results">
+        <div class="test-results">
             <h3>Результаты тестов</h3>
             <ul>
                 <li v-for="result in testResults" :key="result.id">
@@ -30,17 +30,28 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { getTestById, submitTest } from "@/api";
+import { useRouter, useRoute } from "vue-router";
 
 const test = ref({});
 const answers = ref([]);
-const testId = 1; // Замените на динамическое значение
+const userAnswers = ref([]);
+const router = useRouter();
+const route = useRoute();
 
 onMounted(async () => {
+  try {
+    const testId = route.params.id;
     test.value = await getTestById(testId);
+    userAnswers.value = Array(test.value.questions.length).fill(null);
+  } catch (error) {
+    console.error("Ошибка при загрузке теста:", error);
+    alert("Не удалось загрузить тест");
+    router.push("/vacancies");
+  }
 });
 
 const handleSubmit = async () => {
-    const result = await submitTest(testId, answers.value);
+    const result = await submitTest(route.params.id, answers.value);
     alert(`Ваш результат: ${result.score}`);
 };
 </script>

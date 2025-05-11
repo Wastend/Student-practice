@@ -52,6 +52,11 @@ const routes = [
     component: CreateTest,
   },
   {
+    path: "/tests/:id/take",
+    name: "TakeTest",
+    component: () => import("@/views/TakeTest.vue"),
+  },
+  {
     path: "/login",
     name: "Login",
     component: Login,
