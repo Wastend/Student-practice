@@ -14,6 +14,18 @@
               <InputText id="testTitle" v-model="test.title" required />
             </div>
 
+            <!-- Тема теста -->
+            <!-- <div class="form-group">
+              <label for="testTopic">Тема теста</label>
+              <InputText id="testTopic" v-model="testTopic" placeholder="Введите тему теста" />
+              <Button
+                label="Сгенерировать тест"
+                class="btn-secondary mt-2"
+                @click="generateTest"
+                :disabled="isGenerating"
+              />
+            </div> -->
+
             <!-- Вопросы -->
             <div class="form-group">
               <h3>Вопросы</h3>
@@ -90,7 +102,7 @@
 import { Button, Card, Checkbox, InputText } from "primevue";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer } from "@/api";
+import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer, generateTestAPI } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
@@ -107,6 +119,9 @@ const test = ref({
     },
   ],
 });
+
+const testTopic = ref("");
+const isGenerating = ref(false);
 
 const isEditing = ref(false);
 
@@ -220,6 +235,32 @@ const handleAddQuestion = async (testId, question) => {
 const handleAddAnswer = async (questionId, answer) => {
     const newAnswer = await createAnswer(questionId, answer);
     console.log("Ответ добавлен:", newAnswer);
+};
+
+const generateTest = async () => {
+  if (!testTopic.value.trim()) {
+    alert("Введите тему теста!");
+    return;
+  }
+
+  isGenerating.value = true;
+
+  try {
+    const generatedTest = await generateTestAPI(testTopic.value);
+    test.value.questions = generatedTest.questions.map((question) => ({
+      text: question.text,
+      answers: question.answers.map((answer) => ({
+        text: answer.text,
+        isCorrect: answer.isCorrect,
+      })),
+    }));
+    alert("Тест успешно сгенерирован!");
+  } catch (error) {
+    console.error("Ошибка при генерации теста:", error);
+    alert("Не удалось сгенерировать тест");
+  } finally {
+    isGenerating.value = false;
+  }
 };
 </script>
 

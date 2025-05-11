@@ -1,8 +1,11 @@
 const jobModel = require('../models/jobModel');
+const { Configuration, OpenAIApi } = require("openai");
+const { OpenAI } = require("openai");
 
 const getAllJobs = async (req, res) => {
     try {
-        const jobs = await jobModel.getAllJobs(req.query);
+        const filters = req.query;
+        const jobs = await jobModel.getAllJobs(filters);
         res.json(jobs);
     } catch (error) {
         console.error(error);
@@ -25,9 +28,8 @@ const getJobById = async (req, res) => {
 
 const createJob = async (req, res) => {
     try {
-        const { title, description, category, location, remote, salary, employer_id, deadline, testId } = req.body;
+        const { title, description, category, location, remote, salary, deadline, testId, status } = req.body;
 
-        // Убедитесь, что testId — это число или null
         const newJob = await jobModel.createJob({
             title,
             description,
@@ -35,9 +37,10 @@ const createJob = async (req, res) => {
             location,
             remote,
             salary,
-            employer_id: req.user.id, // Используем ID текущего пользователя
+            employer_id: req.user.id,
             deadline,
             testId: testId || null,
+            status: status || 'draft',
         });
         res.status(201).json(newJob);
     } catch (error) {
@@ -81,10 +84,40 @@ const deleteJob = async (req, res) => {
     }
 };
 
+const generateTest = async (req, res) => {
+    const { topic } = req.body;
+
+    if (!topic) {
+        return res.status(400).json({ message: "Тема теста не указана" });
+    }
+
+    try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const prompt = `Сгенерируй тест по теме "${topic}". Включи 3 вопроса с 4 вариантами ответов, где один из них правильный. Верни в формате JSON: [{ "text": "Вопрос", "answers": [{ "text": "Ответ", "isCorrect": true/false }] }]`;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 500,
+        });
+
+        const generatedTest = JSON.parse(response.choices[0].message.content.trim());
+        
+        res.json({ questions: generatedTest });
+    } catch (error) {
+        console.error("Ошибка при генерации теста:", error);
+        res.status(500).json({ message: "Ошибка при генерации теста" });
+    }
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
     createJob,
     updateJob,
     deleteJob,
+    generateTest,
 };

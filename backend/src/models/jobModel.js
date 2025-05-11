@@ -4,6 +4,11 @@ const getAllJobs = async (filters) => {
     let query = 'SELECT * FROM jobs WHERE 1=1';
     const params = [];
 
+    if (filters.status) {
+        query += ' AND status = ?';
+        params.push(filters.status);
+    }
+
     if (filters.category) {
         query += ' AND category = ?';
         params.push(filters.category);
@@ -24,20 +29,27 @@ const getJobById = async (id) => {
 };
 
 const createJob = async (job) => {
-    const { title, description, category, location, remote, salary, employer_id, deadline } = job;
+    const { title, description, category, location, remote, salary, employer_id, deadline, status } = job;
     const [result] = await pool.query(
-        'INSERT INTO jobs (title, description, category, location, remote, salary, employer_id, deadline) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [title, description, category, location, remote, salary, employer_id, deadline]
+        'INSERT INTO jobs (title, description, category, location, remote, salary, employer_id, deadline, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [title, description, category, location, remote, salary, employer_id, deadline, status || 'draft']
     );
     return { id: result.insertId, ...job };
 };
 
 const updateJob = async (id, job) => {
-    const { title, description, category, location, remote, salary, deadline, testId } = job;
-    const [result] = await pool.query(
-        'UPDATE jobs SET title = ?, description = ?, category = ?, location = ?, remote = ?, salary = ?, deadline = ?, test_id = ? WHERE id = ?',
-        [title, description, category, location, remote, salary, deadline, testId, id]
-    );
+    const fields = [];
+    const values = [];
+
+    for (const [key, value] of Object.entries(job)) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+    }
+
+    const query = `UPDATE jobs SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(id);
+
+    const [result] = await pool.query(query, values);
     return result;
 };
 

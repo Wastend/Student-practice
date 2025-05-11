@@ -60,6 +60,11 @@
                 />
               </div>
 
+              <div class="form-group">
+                <label for="salary">Оплата труда</label>
+                <InputNumber id="salary" v-model="vacancy.salary" :min="0" placeholder="Введите оплату труда" />
+              </div>
+
               <!-- Кнопка отправки -->
               <Button
                 :label="isEditing ? 'Сохранить изменения' : 'Создать вакансию'"
@@ -82,6 +87,7 @@ import {
   Dropdown,
   InputText,
   Textarea,
+  InputNumber,
 } from "primevue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -98,6 +104,8 @@ const vacancy = ref({
   testId: null,
   location: "",
   remote: false,
+  salary: 0,
+  status: "draft", // Значение по умолчанию
 });
 
 const tests = ref([]);
@@ -123,6 +131,8 @@ onMounted(async () => {
         testId: tests.value.find((test) => test.id === vacancyData.test_id) || null, // Находим объект теста
         location: vacancyData.location,
         remote: !!vacancyData.remote, // Преобразуем в булевое значение
+        salary: vacancyData.salary || 0,
+        status: vacancyData.status || "draft",
       };
     } catch (error) {
       console.error("Ошибка при загрузке вакансии:", error);
@@ -136,15 +146,15 @@ const handleSubmit = async () => {
   try {
     const payload = {
       ...vacancy.value,
-      testId: vacancy.value.testId?.id || null, // Отправляем только ID теста
-      remote: vacancy.value.remote ? 1 : 0, // Преобразуем в числовое значение
+      testId: vacancy.value.testId?.id || null,
+      remote: vacancy.value.remote ? 1 : 0,
     };
 
     if (isEditing.value) {
-      await updateJob(route.params.id, payload); // Обновляем вакансию
+      await updateJob(route.params.id, payload);
       alert("Вакансия успешно обновлена!");
     } else {
-      await createJob(payload); // Создаём новую вакансию
+      await createJob(payload);
       alert("Вакансия успешно создана!");
     }
 

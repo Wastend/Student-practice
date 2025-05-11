@@ -18,7 +18,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    vacancies.value = await getJobs();
+    vacancies.value = await getJobs({ status: 'published' });
   } catch (error) {
     console.error("Ошибка при загрузке вакансий:", error);
   } finally {

@@ -40,8 +40,9 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.vacancy-header {
-  margin-top: -40px;
+.vacancy-header,
+.vacancy-header-wrap {
+  width: 100%;
 }
 
 .vacancy-card {

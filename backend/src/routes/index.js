@@ -24,6 +24,7 @@ router.get('/jobs/:id', authenticateToken, jobController.getJobById);
 router.post('/jobs', authenticateToken, jobController.createJob);
 router.put('/jobs/:id', authenticateToken, jobController.updateJob);
 router.delete('/jobs/:id', authenticateToken, jobController.deleteJob);
+router.post('/generate-test', authenticateToken, jobController.generateTest);
 
 // Маршруты для заявок
 router.get('/applications', applicationController.getAllApplications);

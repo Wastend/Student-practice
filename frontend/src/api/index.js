@@ -34,9 +34,7 @@ export const updateJob = async (id, jobData) => {
     return response.data;
 };
 
-export const deleteJob = async (id) => {
-    console.log(123);
-    
+export const deleteJob = async (id) => {    
     const response = await axios.delete(`/jobs/${id}`);
     return response.data;
 };
@@ -90,6 +88,11 @@ export const getQuestionsWithAnswers = async (testId) => {
 
 export const updateQuestionsAndAnswers = async (testId, questions) => {
     const response = await axios.put(`/tests/${testId}/questions`, { questions });
+    return response.data;
+};
+
+export const generateTestAPI = async (topic) => {
+    const response = await axios.post("/generate-test", { topic });
     return response.data;
 };
 
