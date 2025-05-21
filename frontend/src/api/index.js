@@ -1,13 +1,26 @@
 import axios from "axios";
 
+// Базовая конфигурация axios
+axios.defaults.baseURL = 'http://localhost:3000/api';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+// Добавляем токен к запросам, если он есть
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Авторизация
 export const login = async (email, password) => {
-    const response = await axios.post("/login", { email, password });
+    const response = await axios.post("/auth/login", { email, password });
     return response.data;
 };
 
 export const register = async (userData) => {
-    const response = await axios.post("/register", userData);
+    const response = await axios.post("/auth/register", userData);
     return response.data;
 };
 
@@ -98,12 +111,12 @@ export const generateTestAPI = async (topic) => {
 
 // Работа с профилем
 export const getProfile = async () => {
-    const response = await axios.get('/profile');
+    const response = await axios.get('/auth/profile');
     return response.data;
 };
 
 export const updateProfile = async (profileData) => {
-    const response = await axios.put("/profile", profileData);
+    const response = await axios.put("/auth/profile", profileData);
     return response.data;
 };
 
@@ -146,4 +159,54 @@ export const updateTag = async (id, tagData) => {
 export const deleteTag = async (id) => {
     const response = await axios.delete(`/tags/${id}`);
     return response.data;
+};
+
+// Метод для загрузки сопроводительного письма
+export const uploadCoverLetter = async (formData, xhr = null) => {
+  if (xhr) {
+    return new Promise((resolve, reject) => {
+      xhr.open('POST', '/api/cover-letters');
+      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
+      
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(JSON.parse(xhr.response));
+        } else {
+          reject(new Error(xhr.response));
+        }
+      };
+      
+      xhr.onerror = () => {
+        reject(new Error('Network error'));
+      };
+      
+      xhr.send(formData);
+    });
+  } else {
+    const response = await axios.post('/api/cover-letters', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    return response.data;
+  }
+};
+
+export const downloadCoverLetterFile = async (id) => {
+  const response = await axios.get(`/cover-letters/${id}/download`, {
+    responseType: 'blob'
+  });
+  return response.data;
+};
+
+export const deleteCoverLetter = async (id) => {
+  const response = await axios.delete(`/cover-letters/${id}`);
+  return response.data;
+};
+
+// Метод для отклика на вакансию
+export const applyToVacancy = async (data) => {
+  const response = await axios.post('/applications', data);
+  return response.data;
 };

@@ -61,7 +61,11 @@ const toggleTheme = () => {
 };
 
 const handleAuthClick = () => {
-  router.push("/login");
+  if (isAuthenticated.value) {
+    router.push("/profile");
+  } else {
+    router.push("/login");
+  }
 };
 
 const goToProfile = () => {

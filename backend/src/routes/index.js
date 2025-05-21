@@ -17,10 +17,12 @@ const tagRoutes = require('./tagRoutes');
 router.get('/users', userController.getAllUsers);
 router.get('/users/:id', userController.getUserById);
 router.post('/users', userController.createUser);
-router.post('/login', userController.loginUser); // Используем метод из userController
-router.post('/register', userController.registerUser);
-router.get('/profile', authenticateToken, userController.getProfile);
-router.put('/profile', authenticateToken, userController.updateProfile);
+
+// Подключаем маршруты
+router.use('/auth', authRoutes);
+router.use('/jobs', jobRoutes);
+router.use('/tests', testRoutes);
+router.use('/tags', tagRoutes);
 
 // Маршруты для вакансий
 router.get('/jobs', jobController.getAllJobs);
@@ -65,10 +67,5 @@ router.get('/protected', authenticateToken, (req, res) => {
 router.get('/', (req, res) => {
     res.send('API is working!');
 });
-
-router.use('/auth', authRoutes);
-router.use('/jobs', jobRoutes);
-router.use('/tests', testRoutes);
-router.use('/tags', tagRoutes);
 
 module.exports = router;

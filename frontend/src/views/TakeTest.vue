@@ -1,7 +1,8 @@
 <template>
     <section class="take-test">
         <div class="container">
-            <Card class="test-card">
+            <ProgressSpinner v-if="isLoading" style="width:50px;height:50px;display:block;margin:40px auto;" />
+            <Card v-else class="test-card">
                 <template #title>
                     <h2>{{ test.title }}</h2>
                 </template>
@@ -38,17 +39,22 @@
 import { ref, onMounted } from "vue";
 import { getTestById, submitTest } from "@/api";
 import { useRouter, useRoute } from "vue-router";
+import { useToast } from "primevue/usetoast";
+import ProgressSpinner from 'primevue/progressspinner';
 import { Card, Button, RadioButton } from "primevue";
 
 const test = ref({});
 const answers = ref([]);
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
 const isSubmitting = ref(false);
 const isSubmitted = ref(false);
 const testResult = ref(null);
+const isLoading = ref(true);
 
 onMounted(async () => {
+    isLoading.value = true;
     try {
         const testId = route.params.id;
         const testData = await getTestById(testId);
@@ -56,14 +62,16 @@ onMounted(async () => {
         answers.value = Array(testData.questions.length).fill(null);
     } catch (error) {
         console.error("Ошибка при загрузке теста:", error);
-        alert("Не удалось загрузить тест");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось загрузить тест', life: 3000 });
         router.push("/vacancies");
+    } finally {
+        isLoading.value = false;
     }
 });
 
 const handleSubmit = async () => {
     if (answers.value.some(answer => answer === null)) {
-        alert("Пожалуйста, ответьте на все вопросы");
+        toast.add({ severity: 'warn', summary: 'Предупреждение', detail: 'Пожалуйста, ответьте на все вопросы', life: 3000 });
         return;
     }
 
@@ -74,7 +82,7 @@ const handleSubmit = async () => {
         isSubmitted.value = true;
     } catch (error) {
         console.error("Ошибка при отправке теста:", error);
-        alert("Не удалось отправить тест");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось отправить тест', life: 3000 });
     } finally {
         isSubmitting.value = false;
     }

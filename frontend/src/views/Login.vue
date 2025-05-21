@@ -31,11 +31,13 @@
 import { Button, Card, InputText, Password } from "primevue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import { login } from "@/api";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const toast = useToast();
 
 const handleLogin = async () => {
     try {
@@ -44,7 +46,7 @@ const handleLogin = async () => {
         router.push("/profile");
     } catch (error) {
         console.error("Ошибка при входе:", error);
-        alert("Неверные данные для входа");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Неверные данные для входа', life: 3000 });
     }
 };
 </script>
@@ -83,10 +85,59 @@ const handleLogin = async () => {
 
 .p-inputtext {
   width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: var(--surface-ground);
+  color: var(--text-color);
+  transition: border-color 0.2s;
 }
 
-.login-card button,
-.register-card button {
+.p-inputtext:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-alpha-20);
+}
+
+.p-password {
   width: 100%;
+}
+
+.p-password-input {
+  width: 100%;
+}
+
+.p-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.p-button-primary {
+  background: var(--primary-color);
+  border: none;
+  color: var(--primary-color-text);
+}
+
+.p-button-primary:hover {
+  background: var(--primary-600);
+}
+
+.p-card {
+  background: var(--surface-card);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.p-card .p-card-content {
+  padding: 1.5rem;
+}
+
+label {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
 }
 </style>

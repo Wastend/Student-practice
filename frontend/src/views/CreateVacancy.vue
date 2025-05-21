@@ -2,7 +2,8 @@
   <section class="create-vacancy">
     <div class="container">
       <div class="create-vacancy-wrap">
-        <Card class="create-vacancy-card">
+        <ProgressSpinner v-if="isLoading" style="width:50px;height:50px;display:block;margin:40px auto;" />
+        <Card v-else class="create-vacancy-card">
           <template #title>
             <h2 class="create-vacancy-title">
               {{ isEditing ? "Редактирование вакансии" : "Создание вакансии" }}
@@ -172,12 +173,14 @@ import {
 } from "primevue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { createJob, updateJob, getTests, getTags } from "@/api";
-import { getJobById } from "@/api";
-import axios from "axios";
+import { useToast } from "primevue/usetoast";
+import ProgressSpinner from 'primevue/progressspinner';
+import { createJob, updateJob, getTests, getTags, getJobById } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
+const isLoading = ref(false);
 
 const vacancy = ref({
   title: "",
@@ -224,12 +227,13 @@ const removeRequirement = (index) => {
 };
 
 onMounted(async () => {
+  isLoading.value = true;
   try {
     tests.value = await getTests();
     availableTags.value = await getTags();
   } catch (error) {
     console.error("Ошибка при загрузке данных:", error);
-    alert("Не удалось загрузить данные");
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось загрузить данные', life: 3000 });
   }
 
   const vacancyId = route.params.id;
@@ -268,10 +272,11 @@ onMounted(async () => {
       selectedTags.value = job.tags.map(tag => tag.id);
     } catch (error) {
       console.error('Ошибка при загрузке вакансии:', error);
-      alert("Не удалось загрузить данные вакансии");
+      toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось загрузить данные вакансии', life: 3000 });
       router.push("/profile");
     }
   }
+  isLoading.value = false;
 });
 
 const handleSubmit = async () => {
@@ -296,16 +301,16 @@ const handleSubmit = async () => {
 
     if (isEditing.value) {
       await updateJob(route.params.id, jobData);
-      alert("Вакансия успешно обновлена!");
+      toast.add({ severity: 'success', summary: 'Успех', detail: 'Вакансия успешно обновлена!', life: 3000 });
     } else {
       await createJob(jobData);
-      alert("Вакансия успешно создана!");
+      toast.add({ severity: 'success', summary: 'Успех', detail: 'Вакансия успешно создана!', life: 3000 });
     }
 
     router.push("/profile");
   } catch (error) {
     console.error('Ошибка при сохранении вакансии:', error);
-    alert('Произошла ошибка при сохранении вакансии');
+    toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Произошла ошибка при сохранении вакансии', life: 3000 });
   }
 };
 

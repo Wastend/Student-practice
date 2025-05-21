@@ -1,7 +1,8 @@
 <template>
   <div class="vacancies-table">
-    <template v-if="vacancies.length > 0">
-      <DataTable :value="vacancies" class="p-datatable-gridlines">
+    <ProgressSpinner v-if="isLoading" style="width:50px;height:50px;display:block;margin:40px auto;" />
+    <template v-else>
+      <DataTable v-if="vacancies.length > 0" :value="vacancies" class="p-datatable-gridlines">
         <Column field="title" header="Название" />
         <Column field="location" header="Локация" />
         <Column field="status" header="Статус">
@@ -24,11 +25,9 @@
           </template>
         </Column>
       </DataTable>
+      <p v-else class="no-data">Вакансии еще не добавлены.</p>
+      <Button label="Создать вакансию" class="btn-primary" style="margin-top: 20px" @click="goToCreateVacancy" />
     </template>
-    <template v-else>
-      <p class="no-data">Вакансии еще не добавлены.</p>
-    </template>
-    <Button label="Создать вакансию" class="btn-primary" style="margin-top: 20px" @click="goToCreateVacancy" />
   </div>
 </template>
 
@@ -36,6 +35,8 @@
   import { Button, Column, DataTable } from "primevue";
   import { ref, watch } from "vue";
   import { useRouter } from "vue-router";
+  import { useToast } from "primevue/usetoast";
+  import ProgressSpinner from 'primevue/progressspinner';
   import Skeleton from 'primevue/skeleton';
   import { updateJob } from "@/api";
 
@@ -47,12 +48,17 @@
     vacancyDelete: {
       type: Function,
       required: true
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     }
   });
 
   const vacancies = ref(props.vacancies)
 
   const router = useRouter();
+  const toast = useToast();
 
   const editVacancy = (id) => {
     router.push(`/vacancies/${id}/edit`);
@@ -61,11 +67,11 @@
   const deleteVacancy = async (id) => {
     if (confirm("Вы уверены, что хотите удалить эту вакансию?")) {
       try {
-        await props.vacancyDelete(id); // Уведомляем родительский компонент
-        alert("Вакансия успешно удалена!");
+        await props.vacancyDelete(id);
+        toast.add({ severity: 'success', summary: 'Успех', detail: 'Вакансия успешно удалена!', life: 3000 });
       } catch (error) {
         console.error("Ошибка при удалении вакансии:", error);
-        alert("Не удалось удалить вакансию");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить вакансию', life: 3000 });
       }
     }
   };
@@ -74,18 +80,17 @@
     const vacancyIndex = vacancies.value.findIndex((vacancy) => vacancy.id === id);
     if (vacancyIndex !== -1) {
       const vacancy = vacancies.value[vacancyIndex];
-      const newStatus = vacancy.status === "published" ? "draft" : "published"; // Используем значения из базы данных
+      const newStatus = vacancy.status === "published" ? "draft" : "published";
       try {
-        await updateJob(id, { status: newStatus }); // Обновляем статус через API
-        // Обновляем статус в массиве вакансий
+        await updateJob(id, { status: newStatus });
+        toast.add({ severity: 'success', summary: 'Успех', detail: `Вакансия ${newStatus === "published" ? "опубликована" : "снята с публикации"}!`, life: 3000 });
         vacancies.value[vacancyIndex] = {
           ...vacancy,
           status: newStatus,
         };
-        alert(`Вакансия ${newStatus === "published" ? "опубликована" : "снята с публикации"}!`);
       } catch (error) {
         console.error("Ошибка при изменении статуса вакансии:", error);
-        alert("Не удалось изменить статус вакансии");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить статус вакансии', life: 3000 });
       }
     }
   };
