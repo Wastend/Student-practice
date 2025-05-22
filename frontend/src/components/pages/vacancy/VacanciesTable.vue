@@ -82,7 +82,28 @@
       const vacancy = vacancies.value[vacancyIndex];
       const newStatus = vacancy.status === "published" ? "draft" : "published";
       try {
-        await updateJob(id, { status: newStatus });
+        // Подготавливаем данные для обновления
+        const updateData = {
+          title: vacancy.title,
+          description: vacancy.description,
+          category: vacancy.category,
+          location: vacancy.location,
+          remote: vacancy.remote,
+          salary: vacancy.salary,
+          test_id: vacancy.test_id,
+          work_schedule: vacancy.work_schedule,
+          employment_type: vacancy.employment_type,
+          experience_level: vacancy.experience_level,
+          education_level: vacancy.education_level,
+          benefits: vacancy.benefits,
+          mentor_support: vacancy.mentor_support,
+          certificate: vacancy.certificate,
+          possibility_of_employment: vacancy.possibility_of_employment,
+          paid: vacancy.paid,
+          status: newStatus
+        };
+
+        await updateJob(id, updateData);
         toast.add({ severity: 'success', summary: 'Успех', detail: `Вакансия ${newStatus === "published" ? "опубликована" : "снята с публикации"}!`, life: 3000 });
         vacancies.value[vacancyIndex] = {
           ...vacancy,

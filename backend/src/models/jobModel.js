@@ -95,7 +95,7 @@ const updateJob = async (id, job) => {
         title, description, category, location, remote, salary, testId,
         responsibilities, requirements, tags,
         work_schedule, employment_type, experience_level, education_level, benefits,
-        mentor_support, certificate, possibility_of_employment, paid
+        mentor_support, certificate, possibility_of_employment, paid, status
     } = job;
     
     // Обновляем основную информацию о вакансии
@@ -104,23 +104,24 @@ const updateJob = async (id, job) => {
             title = ?, description = ?, category = ?, location = ?, remote = ?, 
             salary = ?, test_id = ?, work_schedule = ?, employment_type = ?,
             experience_level = ?, education_level = ?, benefits = ?,
-            mentor_support = ?, certificate = ?, possibility_of_employment = ?, paid = ?
+            mentor_support = ?, certificate = ?, possibility_of_employment = ?, paid = ?,
+            status = ?
         WHERE id = ?`,
         [
             title, description, category, location, remote, salary, testId || null,
             work_schedule, employment_type, experience_level, education_level, benefits,
-            mentor_support, certificate, possibility_of_employment, paid,
+            mentor_support, certificate, possibility_of_employment, paid, status,
             id
         ]
     );
     
-    // Обновляем обязанности
-    if (responsibilities) {
+    // Обновляем обязанности только если они не пустые
+    if (responsibilities && responsibilities.length > 0 && responsibilities.some(r => r.text && r.text.trim())) {
         await responsibilityModel.updateResponsibilities(id, responsibilities);
     }
     
-    // Обновляем требования
-    if (requirements) {
+    // Обновляем требования только если они не пустые
+    if (requirements && requirements.length > 0 && requirements.some(r => r.text && r.text.trim())) {
         await requirementModel.updateRequirements(id, requirements);
     }
     

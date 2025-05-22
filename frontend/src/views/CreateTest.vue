@@ -206,7 +206,7 @@ const handleSubmit = async (e) => {
             await createTest(test.value);
             toast.add({ severity: 'success', summary: 'Успех', detail: 'Тест успешно создан!', life: 3000 });
         }
-        router.push("/tests");
+        router.push("/profile");
     } catch (error) {
         console.error("Ошибка при сохранении теста:", error);
         toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить тест', life: 3000 });

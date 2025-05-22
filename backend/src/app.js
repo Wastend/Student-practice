@@ -1,8 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const authRoutes = require('./routes/authRoutes');
-const coverLetterRoutes = require('./routes/coverLetterRoutes');
+const indexRoutes = require('./routes/index');
 
 const app = express();
 
@@ -24,9 +23,8 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/cover-letters', coverLetterRoutes);
+// Основные роуты
+app.use('/api', indexRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {

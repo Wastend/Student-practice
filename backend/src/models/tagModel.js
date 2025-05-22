@@ -7,7 +7,11 @@ const getAllTags = async () => {
 
 const getTagsByJobId = async (jobId) => {
     const [rows] = await pool.query(
-        'SELECT t.* FROM tags t JOIN job_tags jt ON t.id = jt.tag_id WHERE jt.job_id = ?',
+        `SELECT t.id, t.name 
+         FROM tags t 
+         JOIN job_tags jt ON t.id = jt.tag_id 
+         WHERE jt.job_id = ? 
+         ORDER BY t.name`,
         [jobId]
     );
     return rows;
@@ -22,8 +26,8 @@ const updateJobTags = async (jobId, tagIds) => {
     // Удаляем старые связи
     await pool.query('DELETE FROM job_tags WHERE job_id = ?', [jobId]);
     
-    // Добавляем новые связи
-    if (tagIds && tagIds.length > 0) {
+    // Добавляем новые связи только если есть теги
+    if (tagIds && tagIds.length > 0 && tagIds.every(id => id !== null && id !== undefined)) {
         const values = tagIds.map(tagId => [jobId, tagId]);
         await pool.query('INSERT INTO job_tags (job_id, tag_id) VALUES ?', [values]);
     }

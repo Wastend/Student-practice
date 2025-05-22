@@ -40,32 +40,53 @@
             </div>
             <div class="vacancy-conditions" v-if="hasConditions">
               <h2 class="description-title">Условия работы</h2>
-              <div class="conditions-grid">
+              <div class="conditions-list">
                 <div class="condition-item" v-if="work_schedule">
-                  <h3>График работы</h3>
-                  <p>{{ work_schedule }}</p>
+                  <span class="condition-label">График работы:</span>
+                  <span class="condition-value">{{ work_schedule }}</span>
                 </div>
                 <div class="condition-item" v-if="employment_type">
-                  <h3>Тип занятости</h3>
-                  <p>{{ employment_type }}</p>
+                  <span class="condition-label">Тип занятости:</span>
+                  <span class="condition-value">{{ employment_type }}</span>
                 </div>
                 <div class="condition-item" v-if="experience_level">
-                  <h3>Опыт работы</h3>
-                  <p>{{ experience_level }}</p>
+                  <span class="condition-label">Опыт работы:</span>
+                  <span class="condition-value">{{ experience_level }}</span>
                 </div>
                 <div class="condition-item" v-if="education_level">
-                  <h3>Образование</h3>
-                  <p>{{ education_level }}</p>
+                  <span class="condition-label">Образование:</span>
+                  <span class="condition-value">{{ education_level }}</span>
                 </div>
               </div>
-              <div class="benefits" v-if="benefits">
-                <h3>Преимущества</h3>
-                <p>{{ benefits }}</p>
-              </div>
+            </div>
+            <div class="vacancy-benefits" v-if="benefits">
+              <h2 class="description-title">Преимущества</h2>
+              <p class="description-text">{{ benefits }}</p>
             </div>
             <div class="vacancy-salary" v-if="salary">
               <h2 class="description-title">Зарплата</h2>
               <p class="description-text">{{ salary }} ₽</p>
+            </div>
+            <div class="vacancy-additional-conditions" v-if="hasAdditionalConditions">
+              <h2 class="description-title">Дополнительные условия</h2>
+              <div class="conditions-grid">
+                <div v-if="mentor_support" class="condition-item">
+                  <i class="pi pi-user-plus"></i>
+                  <span>Поддержка ментора</span>
+                </div>
+                <div v-if="certificate" class="condition-item">
+                  <i class="pi pi-id-card"></i>
+                  <span>Сертификат по окончании</span>
+                </div>
+                <div v-if="possibility_of_employment" class="condition-item">
+                  <i class="pi pi-briefcase"></i>
+                  <span>Возможность трудоустройства</span>
+                </div>
+                <div v-if="paid" class="condition-item">
+                  <i class="pi pi-money-bill"></i>
+                  <span>Оплачиваемая стажировка</span>
+                </div>
+              </div>
             </div>
             <Button
               label="Пройти тест"
@@ -83,9 +104,11 @@
 <script setup>
 import { Card, Tag, Button } from "primevue";
 import { useRouter } from "vue-router";
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { getTags } from "@/api";
 
 const router = useRouter();
+const availableTags = ref([]);
 
 const props = defineProps({
   title: String,
@@ -103,11 +126,32 @@ const props = defineProps({
   employment_type: String,
   experience_level: String,
   education_level: String,
-  benefits: String
+  benefits: String,
+  mentor_support: Boolean,
+  certificate: Boolean,
+  possibility_of_employment: Boolean,
+  paid: Boolean
+});
+
+const getTagName = (tagId) => {
+  const tag = availableTags.value.find(t => t.id === tagId);
+  return tag ? tag.name : '';
+};
+
+onMounted(async () => {
+  try {
+    availableTags.value = await getTags();
+  } catch (error) {
+    console.error('Ошибка при загрузке тегов:', error);
+  }
 });
 
 const hasConditions = computed(() => {
-  return props.work_schedule || props.employment_type || props.experience_level || props.education_level || props.benefits;
+  return props.work_schedule || props.employment_type || props.experience_level || props.education_level;
+});
+
+const hasAdditionalConditions = computed(() => {
+  return props.mentor_support || props.certificate || props.possibility_of_employment || props.paid;
 });
 
 const goToTest = () => {
@@ -171,6 +215,7 @@ const goToTest = () => {
 .description-text {
   white-space: pre-line;
   line-height: 1.5;
+  color: var(--text-color);
 }
 
 .list {
@@ -184,6 +229,7 @@ const goToTest = () => {
   padding-left: 1.5rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
+  color: var(--text-color);
 }
 
 .list-item::before {
@@ -201,15 +247,18 @@ const goToTest = () => {
 }
 
 .condition-item {
-  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
   background-color: var(--surface-ground);
   border-radius: 8px;
+  color: var(--text-color);
 }
 
-.condition-item h3 {
-  font-size: 1rem;
-  color: var(--text-color-secondary);
-  margin-bottom: 0.5rem;
+.condition-item i {
+  color: var(--primary-color);
+  font-size: 1.2rem;
 }
 
 .benefits {
@@ -227,5 +276,9 @@ const goToTest = () => {
 
 .mt-2 {
   margin-top: 1rem;
+}
+
+.vacancy-additional-conditions {
+  margin-top: 2rem;
 }
 </style>

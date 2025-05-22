@@ -269,7 +269,7 @@ onMounted(async () => {
       requirements.value = job.requirements.map(item => ({ text: item.text }));
 
       // Загрузка тегов
-      selectedTags.value = job.tags.map(tag => tag.id);
+      selectedTags.value = job.tags || [];
     } catch (error) {
       console.error('Ошибка при загрузке вакансии:', error);
       toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось загрузить данные вакансии', life: 3000 });
@@ -281,6 +281,10 @@ onMounted(async () => {
 
 const handleSubmit = async () => {
   try {
+    // Фильтруем пустые обязанности и требования
+    const filteredResponsibilities = responsibilities.value.filter(item => item.text && item.text.trim());
+    const filteredRequirements = requirements.value.filter(item => item.text && item.text.trim());
+
     const jobData = {
       title: vacancy.value.title,
       description: vacancy.value.description,
@@ -289,8 +293,8 @@ const handleSubmit = async () => {
       remote: vacancy.value.remote,
       salary: vacancy.value.salary,
       testId: vacancy.value.testId?.id || null,
-      responsibilities: responsibilities.value,
-      requirements: requirements.value,
+      responsibilities: filteredResponsibilities,
+      requirements: filteredRequirements,
       tags: selectedTags.value,
       benefits: benefits.value,
       mentor_support: conditions.value.mentorSupport,
@@ -298,6 +302,8 @@ const handleSubmit = async () => {
       possibility_of_employment: conditions.value.possibilityOfEmployment,
       paid: conditions.value.paid
     };
+
+    console.log('Job data:', jobData);
 
     if (isEditing.value) {
       await updateJob(route.params.id, jobData);

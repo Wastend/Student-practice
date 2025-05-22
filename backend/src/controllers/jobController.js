@@ -28,7 +28,32 @@ const getJobById = async (req, res) => {
 
 const createJob = async (req, res) => {
     try {
-        const { title, description, category, location, remote, salary, deadline, testId, status } = req.body;
+        const { 
+            title, 
+            description, 
+            category, 
+            location, 
+            remote, 
+            salary, 
+            deadline, 
+            testId, 
+            status,
+            responsibilities,
+            requirements,
+            tags,
+            work_schedule,
+            employment_type,
+            experience_level,
+            education_level,
+            benefits,
+            mentor_support,
+            certificate,
+            possibility_of_employment,
+            paid
+        } = req.body;
+
+        // Получаем только ID тегов
+        const tagIds = tags ? tags.map(tag => tag.id) : [];
 
         const newJob = await jobModel.createJob({
             title,
@@ -41,8 +66,23 @@ const createJob = async (req, res) => {
             deadline,
             testId: testId || null,
             status: status || 'draft',
+            responsibilities,
+            requirements,
+            tags: tagIds,
+            work_schedule,
+            employment_type,
+            experience_level,
+            education_level,
+            benefits,
+            mentor_support,
+            certificate,
+            possibility_of_employment,
+            paid
         });
-        res.status(201).json(newJob);
+
+        // Получаем полную информацию о вакансии с тегами
+        const fullJob = await jobModel.getJobById(newJob.id);
+        res.status(201).json(fullJob);
     } catch (error) {
         console.error("Ошибка при создании вакансии:", error);
         res.status(500).json({ message: "Ошибка сервера" });
@@ -54,13 +94,23 @@ const updateJob = async (req, res) => {
         const { id } = req.params;
         const job = req.body;
 
+        // Получаем только ID тегов, фильтруем null и undefined
+        if (job.tags) {
+            job.tags = job.tags
+                .map(tag => typeof tag === 'object' ? tag.id : tag)
+                .filter(id => id !== null && id !== undefined);
+        }
+
         const existingJob = await jobModel.getJobById(id);
         if (!existingJob || existingJob.employer_id !== req.user.id) {
             return res.status(404).json({ message: 'Вакансия не найдена или у вас нет доступа' });
         }
 
         await jobModel.updateJob(id, job);
-        res.json({ message: 'Вакансия успешно обновлена' });
+        
+        // Получаем обновленную вакансию с тегами
+        const updatedJob = await jobModel.getJobById(id);
+        res.json(updatedJob);
     } catch (error) {
         console.error('Ошибка при обновлении вакансии:', error);
         res.status(500).json({ message: 'Ошибка сервера' });

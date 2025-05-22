@@ -6,17 +6,11 @@
         :requirements="vacancy.requirements" :salary="vacancy.salary" :remote="vacancy.remote"
         :test_id="vacancy.test_id" :tags="vacancy.tags" :work_schedule="vacancy.work_schedule"
         :employment_type="vacancy.employment_type" :experience_level="vacancy.experience_level"
-        :education_level="vacancy.education_level" :benefits="vacancy.benefits" />
-      <VacancyInfo 
-        :responsibilities="vacancy.responsibilities" 
-        :requirements="vacancy.requirements" 
-        :conditions="{
-          mentor_support: vacancy.mentor_support,
-          certificate: vacancy.certificate,
-          possibility_of_employment: vacancy.possibility_of_employment,
-          paid: vacancy.paid
-        }" 
-      />
+        :education_level="vacancy.education_level" :benefits="vacancy.benefits"
+        :mentor_support="vacancy.mentor_support"
+        :certificate="vacancy.certificate"
+        :possibility_of_employment="vacancy.possibility_of_employment"
+        :paid="vacancy.paid" />
     </div>
   </div>
 </template>
@@ -25,7 +19,6 @@
   import { ref, onMounted } from "vue";
   import { useRoute } from "vue-router";
   import VacancyHeader from "@/components/pages/vacancy/VacancyHeader.vue";
-  import VacancyInfo from "@/components/pages/vacancy/VacancyInfo.vue";
   import axios from "axios";
 
   const route = useRoute();
