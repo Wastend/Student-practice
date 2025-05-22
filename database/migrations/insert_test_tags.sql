@@ -1,0 +1,22 @@
+-- Добавление тестовых тегов
+INSERT INTO tags (name) VALUES 
+('JavaScript'),
+('Vue.js'),
+('Node.js'),
+('React'),
+('Python'),
+('Java'),
+('C#'),
+('PHP'),
+('DevOps'),
+('UI/UX'),
+('Frontend'),
+('Backend'),
+('Fullstack'),
+('Mobile'),
+('Database'),
+('Cloud'),
+('Security'),
+('Testing'),
+('Agile'),
+('Remote'); 

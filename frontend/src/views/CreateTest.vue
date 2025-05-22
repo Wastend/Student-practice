@@ -102,10 +102,12 @@
 import { Button, Card, Checkbox, InputText } from "primevue";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer, generateTestAPI } from "@/api";
 
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
 
 const test = ref({
   title: "",
@@ -143,8 +145,8 @@ onMounted(async () => {
             }));
         } catch (error) {
             console.error("Ошибка при загрузке теста:", error);
-            alert("Тест не найден или у вас нет доступа");
-            router.push("/profile");
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Тест не найден или у вас нет доступа', life: 3000 });
+            router.push("/tests");
         }
     }
 });
@@ -160,17 +162,17 @@ const addQuestion = () => {
 };
 
 const removeQuestion = async (index) => {
-    const question = test.value.questions[index];
-    if (question.id) {
+    if (isEditing.value && test.value.questions[index].id) {
         try {
-            await deleteQuestion(question.id); // Удаляем вопрос из базы
+            await deleteQuestion(test.value.questions[index].id);
+            test.value.questions.splice(index, 1);
         } catch (error) {
-            console.error('Ошибка при удалении вопроса:', error);
-            alert('Не удалось удалить вопрос');
-            return;
+            console.error("Ошибка при удалении вопроса:", error);
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить вопрос', life: 3000 });
         }
+    } else {
+        test.value.questions.splice(index, 1);
     }
-    test.value.questions.splice(index, 1); // Удаляем вопрос из списка
 };
 
 const addAnswer = (questionIndex) => {
@@ -181,49 +183,33 @@ const addAnswer = (questionIndex) => {
 };
 
 const removeAnswer = async (questionIndex, answerIndex) => {
-    const answer = test.value.questions[questionIndex].answers[answerIndex];
-    if (answer.id) {
+    if (isEditing.value && test.value.questions[questionIndex].answers[answerIndex].id) {
         try {
-            await deleteAnswer(answer.id); // Удаляем ответ из базы
+            await deleteAnswer(test.value.questions[questionIndex].answers[answerIndex].id);
+            test.value.questions[questionIndex].answers.splice(answerIndex, 1);
         } catch (error) {
-            console.error('Ошибка при удалении ответа:', error);
-            alert('Не удалось удалить ответ');
-            return;
+            console.error("Ошибка при удалении ответа:", error);
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить ответ', life: 3000 });
         }
+    } else {
+        test.value.questions[questionIndex].answers.splice(answerIndex, 1);
     }
-    test.value.questions[questionIndex].answers.splice(answerIndex, 1); // Удаляем ответ из списка
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-        let testId;
-
         if (isEditing.value) {
-            await updateTest(route.params.id, { title: test.value.title });
-            testId = route.params.id;
-            alert("Тест успешно обновлён!");
+            await updateTest(test.value);
+            toast.add({ severity: 'success', summary: 'Успех', detail: 'Тест успешно обновлён!', life: 3000 });
         } else {
-            const createdTest = await createTest({ title: test.value.title });
-            testId = createdTest.id;
-            alert("Тест успешно создан!");
+            await createTest(test.value);
+            toast.add({ severity: 'success', summary: 'Успех', detail: 'Тест успешно создан!', life: 3000 });
         }
-
-        // Преобразуем ответы перед отправкой
-        const questions = test.value.questions.map((question) => ({
-            ...question,
-            answers: question.answers.map((answer) => ({
-                ...answer,
-                isCorrect: answer.isCorrect ? 1 : 0, // Преобразуем в 0 или 1
-            })),
-        }));
-
-        // Обновляем вопросы и ответы
-        await updateQuestionsAndAnswers(testId, questions);
-
-        router.push("/profile");
+        router.push("/tests");
     } catch (error) {
         console.error("Ошибка при сохранении теста:", error);
-        alert("Не удалось сохранить тест");
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сохранить тест', life: 3000 });
     }
 };
 
@@ -238,29 +224,22 @@ const handleAddAnswer = async (questionId, answer) => {
 };
 
 const generateTest = async () => {
-  if (!testTopic.value.trim()) {
-    alert("Введите тему теста!");
-    return;
-  }
+    if (!testTopic.value) {
+        toast.add({ severity: 'warn', summary: 'Предупреждение', detail: 'Введите тему теста!', life: 3000 });
+        return;
+    }
 
-  isGenerating.value = true;
-
-  try {
-    const generatedTest = await generateTestAPI(testTopic.value);
-    test.value.questions = generatedTest.questions.map((question) => ({
-      text: question.text,
-      answers: question.answers.map((answer) => ({
-        text: answer.text,
-        isCorrect: answer.isCorrect,
-      })),
-    }));
-    alert("Тест успешно сгенерирован!");
-  } catch (error) {
-    console.error("Ошибка при генерации теста:", error);
-    alert("Не удалось сгенерировать тест");
-  } finally {
-    isGenerating.value = false;
-  }
+    isGenerating.value = true;
+    try {
+        const generatedTest = await generateTestAPI(testTopic.value);
+        test.value = generatedTest;
+        toast.add({ severity: 'success', summary: 'Успех', detail: 'Тест успешно сгенерирован!', life: 3000 });
+    } catch (error) {
+        console.error("Ошибка при генерации теста:", error);
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось сгенерировать тест', life: 3000 });
+    } finally {
+        isGenerating.value = false;
+    }
 };
 </script>
 

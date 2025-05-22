@@ -1,0 +1,4 @@
+ALTER TABLE cover_letters
+ADD COLUMN name VARCHAR(255) NOT NULL AFTER user_id,
+ADD COLUMN file_name VARCHAR(255) NOT NULL AFTER name,
+ADD COLUMN file_size INT NOT NULL AFTER file_name; 

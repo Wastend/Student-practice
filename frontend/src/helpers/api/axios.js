@@ -16,7 +16,10 @@ export default function initialAxios() {
     axios.interceptors.response.use(
         (response) => response,
         (error) => {
-            console.error("Ошибка API:", error.response?.data || error.message);
+            // Не логируем ошибки 404, так как это нормальная ситуация
+            if (error.response?.status !== 404) {
+                console.error("Ошибка API:", error.response?.data || error.message);
+            }
             return Promise.reject(error);
         }
     );

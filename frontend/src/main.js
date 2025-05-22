@@ -9,6 +9,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import initialAxios from "./helpers/api/axios";
 import router from "./router";
+import Tooltip from 'primevue/tooltip';
 
 initialAxios();
 
@@ -23,10 +24,12 @@ app.use(PrimeVue, {
       cssLayer: false,
     },
   },
+  ripple: true
 });
 
 app.use(createPinia());
 app.use(router);
 app.use(ToastService);
+app.directive('tooltip', Tooltip);
 
 app.mount("#app");

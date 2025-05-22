@@ -6,14 +6,14 @@
           <h2 class="login-title">Вход</h2>
         </template>
         <template #content>
-          <form @submit.prevent="handleLogin">
+          <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label for="email">Email</label>
-              <InputText id="email" v-model="email" required />
+              <InputText id="email" v-model="form.email" required />
             </div>
             <div class="form-group">
               <label for="password">Пароль</label>
-              <Password id="password" v-model="password" toggleMask required />
+              <Password id="password" v-model="form.password" toggleMask required />
             </div>
             <Button label="Войти" class="btn-primary" type="submit" />
           </form>
@@ -31,21 +31,34 @@
 import { Button, Card, InputText, Password } from "primevue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { login } from "@/api";
+import { login } from "../api";
+import { saveToken } from "../utils/auth";
+import { useToast } from "primevue/usetoast";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const toast = useToast();
 
-const handleLogin = async () => {
-    try {
-        const { token } = await login(email.value, password.value);
-        localStorage.setItem("token", token);
-        router.push("/profile");
-    } catch (error) {
-        console.error("Ошибка при входе:", error);
-        alert("Неверные данные для входа");
-    }
+const form = ref({
+  email,
+  password,
+});
+
+const handleSubmit = async () => {
+  try {
+    const response = await login(form.value.email, form.value.password);
+    saveToken(response.token);
+    router.push("/profile");
+  } catch (error) {
+    console.error("Ошибка при входе:", error);
+    toast.add({
+      severity: "error",
+      summary: "Ошибка",
+      detail: error.response?.data?.message || "Не удалось войти в систему",
+      life: 3000,
+    });
+  }
 };
 </script>
 

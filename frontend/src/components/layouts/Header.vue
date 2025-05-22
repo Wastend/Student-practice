@@ -49,9 +49,10 @@
 import SvgIcon from "@/components/ui/SvgIcon.vue";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
+import { hasToken, removeToken } from "@/utils/auth";
 
 const isDarkTheme = ref(false);
-const isAuthenticated = ref(localStorage.getItem("token") !== null);
+const isAuthenticated = ref(hasToken());
 const isMobileMenuOpen = ref(false);
 const router = useRouter();
 
@@ -61,7 +62,13 @@ const toggleTheme = () => {
 };
 
 const handleAuthClick = () => {
-  router.push("/login");
+  if (isAuthenticated.value) {
+    removeToken();
+    isAuthenticated.value = false;
+    router.push("/login");
+  } else {
+    router.push("/login");
+  }
 };
 
 const goToProfile = () => {
