@@ -6,49 +6,91 @@
           <h2 class="register-title">Регистрация</h2>
         </template>
         <template #content>
-          <form @submit.prevent="handleRegister">
+          <form @submit.prevent="handleSubmit">
             <div class="form-group">
-              <label for="role">Выберите роль</label>
-              <Select
-                id="role"
-                v-model="role"
-                :options="roles"
-                option-label="label"
-                placeholder="Выберите роль"
+              <label for="username">Имя пользователя</label>
+              <InputText
+                id="username"
+                v-model="form.username"
+                :class="{ 'p-invalid': errors.username }"
                 required
               />
+              <small class="p-error" v-if="errors.username">{{ errors.username }}</small>
             </div>
             <div class="form-group">
               <label for="email">Email</label>
-              <InputText id="email" v-model="email" required />
+              <InputText
+                id="email"
+                v-model="form.email"
+                type="email"
+                :class="{ 'p-invalid': errors.email }"
+                required
+              />
+              <small class="p-error" v-if="errors.email">{{ errors.email }}</small>
             </div>
             <div class="form-group">
               <label for="password">Пароль</label>
-              <Password id="password" v-model="password" toggleMask required />
+              <Password
+                id="password"
+                v-model="form.password"
+                :feedback="true"
+                :class="{ 'p-invalid': errors.password }"
+                required
+              />
+              <small class="p-error" v-if="errors.password">{{ errors.password }}</small>
             </div>
-            <div v-if="role?.value === 'company'" class="company-fields">
+            <div class="form-group">
+              <label for="role">Роль</label>
+              <Dropdown
+                id="role"
+                v-model="form.role_id"
+                :options="roles"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Выберите роль"
+                :class="{ 'p-invalid': errors.role_id }"
+                required
+              />
+              <small class="p-error" v-if="errors.role_id">{{ errors.role_id }}</small>
+            </div>
+            <div v-if="form.role_id === 2" class="company-fields">
               <div class="form-group">
                 <label for="companyName">Название компании</label>
-                <InputText id="companyName" v-model="companyName" required />
+                <InputText
+                  id="companyName"
+                  v-model="form.company_name"
+                  :class="{ 'p-invalid': errors.company_name }"
+                  required
+                />
+                <small class="p-error" v-if="errors.company_name">{{ errors.company_name }}</small>
               </div>
               <div class="form-group">
                 <label for="companyWebsite">Веб-сайт компании</label>
-                <InputText id="companyWebsite" v-model="companyWebsite" />
+                <InputText
+                  id="companyWebsite"
+                  v-model="form.company_website"
+                  :class="{ 'p-invalid': errors.company_website }"
+                  required
+                />
+                <small class="p-error" v-if="errors.company_website">{{ errors.company_website }}</small>
               </div>
               <div class="form-group">
                 <label for="companyDescription">Описание компании</label>
                 <Textarea
                   id="companyDescription"
-                  v-model="companyDescription"
-                  rows="4"
-                  autoResize
+                  v-model="form.company_description"
+                  rows="3"
+                  :class="{ 'p-invalid': errors.company_description }"
+                  required
                 />
+                <small class="p-error" v-if="errors.company_description">{{ errors.company_description }}</small>
               </div>
             </div>
             <Button
               label="Зарегистрироваться"
               class="btn-primary"
               type="submit"
+              :loading="isSubmitting"
             />
             <p class="register-link">
               Есть аккаунт?
@@ -62,42 +104,128 @@
 </template>
 
 <script setup>
-import { Button, Card, InputText, Password, Select, Textarea } from "primevue";
+import { Button, Card, InputText, Password, Dropdown, Textarea } from "primevue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
 import { register } from "@/api";
 
 const roles = [
-  { label: "Студент", value: "student" },
-  { label: "Компания", value: "company" },
+  { id: 1, name: "Студент" },
+  { id: 2, name: "Компания" },
 ];
 
-const role = ref(null);
-const email = ref("");
-const password = ref("");
-const companyName = ref("");
-const companyWebsite = ref("");
-const companyDescription = ref("");
 const router = useRouter();
+const toast = useToast();
+const isSubmitting = ref(false);
+const errors = ref({});
 
-const handleRegister = async () => {
-    try {        
-        const userData = {
-            username: email.value.split("@")[0],
-            email: email.value,
-            password: password.value,
-            role_id: role.value.value === "student" ? 1 : 2,
-            company_name: companyName.value || null,
-            company_website: companyWebsite.value || null,
-            company_description: companyDescription.value || null,
-        };
-        await register(userData);
-        alert("Регистрация прошла успешно!");
-        router.push("/login");
-    } catch (error) {
-        console.error("Ошибка при регистрации:", error);
-        alert("Ошибка при регистрации");
+const form = ref({
+  username: '',
+  email: '',
+  password: '',
+  role_id: null,
+  company_name: '',
+  company_website: '',
+  company_description: ''
+});
+
+const validateForm = () => {
+  errors.value = {};
+  let isValid = true;
+
+  if (!form.value.username) {
+    errors.value.username = 'Введите имя пользователя';
+    isValid = false;
+  }
+
+  if (!form.value.email) {
+    errors.value.email = 'Введите email';
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.value.email = 'Введите корректный email';
+    isValid = false;
+  }
+
+  if (!form.value.password) {
+    errors.value.password = 'Введите пароль';
+    isValid = false;
+  } else if (form.value.password.length < 6) {
+    errors.value.password = 'Пароль должен содержать минимум 6 символов';
+    isValid = false;
+  }
+
+  if (!form.value.role_id) {
+    errors.value.role_id = 'Выберите роль';
+    isValid = false;
+  }
+
+  if (form.value.role_id === 2) {
+    if (!form.value.company_name) {
+      errors.value.company_name = 'Введите название компании';
+      isValid = false;
     }
+
+    if (!form.value.company_website) {
+      errors.value.company_website = 'Введите веб-сайт компании';
+      isValid = false;
+    } else if (!/^https?:\/\/.+/.test(form.value.company_website)) {
+      errors.value.company_website = 'Введите корректный URL';
+      isValid = false;
+    }
+
+    if (!form.value.company_description) {
+      errors.value.company_description = 'Введите описание компании';
+      isValid = false;
+    }
+  }
+
+  return isValid;
+};
+
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    return;
+  }
+
+  isSubmitting.value = true;
+  try {
+    await register(form.value);
+    toast.add({
+      severity: 'success',
+      summary: 'Успех',
+      detail: 'Регистрация успешно завершена',
+      life: 3000
+    });
+    router.push('/login');
+  } catch (error) {
+    console.error('Ошибка при регистрации:', error);
+    
+    if (error.response?.data?.message) {
+      const message = error.response.data.message;
+      if (message.includes('username')) {
+        errors.value.username = 'Пользователь с таким именем уже существует';
+      } else if (message.includes('email')) {
+        errors.value.email = 'Пользователь с таким email уже существует';
+      } else {
+        toast.add({
+          severity: 'error',
+          summary: 'Ошибка',
+          detail: message,
+          life: 3000
+        });
+      }
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Ошибка',
+        detail: 'Произошла ошибка при регистрации',
+        life: 3000
+      });
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 </script>
 
@@ -115,5 +243,20 @@ const handleRegister = async () => {
 
 .form-group {
   margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.p-error {
+  color: var(--red-500);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.p-invalid {
+  border-color: var(--red-500) !important;
 }
 </style>
