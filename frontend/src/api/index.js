@@ -50,10 +50,22 @@ export const register = async (userData) => {
 
 // Работа с вакансиями
 export const getJobs = async (filters = {}) => {
-    const response = await axiosInstance.get("/jobs", { params: filters });
-    console.log(response);
-    
-    return response.data;
+    try {
+        const queryParams = new URLSearchParams();
+        
+        // Добавляем все фильтры в URL
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                queryParams.append(key, value);
+            }
+        });
+        
+        const response = await axios.get(`http://localhost:3000/api/jobs?${queryParams.toString()}`);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при получении вакансий:", error);
+        throw error;
+    }
 };
 
 export const getJobById = async (id) => {

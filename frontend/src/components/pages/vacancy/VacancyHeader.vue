@@ -8,7 +8,7 @@
           </template>
           <template #content>
             <div class="vacancy-meta">
-              <Tag v-if="category" class="vacancy-category" severity="info">{{ category }}</Tag>
+              <Tag v-if="category" class="vacancy-category" severity="info">{{ getCategoryName(category) }}</Tag>
               <Tag v-if="location" class="vacancy-location" severity="success">{{ location }}</Tag>
               <Tag v-if="company?.name" class="vacancy-company" severity="warning">{{ company.name }}</Tag>
               <Tag v-if="remote" class="vacancy-remote" severity="info">Удаленная работа</Tag>
@@ -86,34 +86,34 @@
                 </li>
               </ul>
             </div>
-            <div class="vacancy-conditions" v-if="hasConditions">
-              <h2 class="description-title">Условия работы</h2>
-              <div class="conditions-list">
-                <div class="condition-item" v-if="work_schedule">
-                  <span class="condition-label">График работы:</span>
-                  <span class="condition-value">{{ work_schedule }}</span>
-                </div>
-                <div class="condition-item" v-if="employment_type">
-                  <span class="condition-label">Тип занятости:</span>
-                  <span class="condition-value">{{ employment_type }}</span>
-                </div>
-                <div class="condition-item" v-if="experience_level">
-                  <span class="condition-label">Опыт работы:</span>
-                  <span class="condition-value">{{ experience_level }}</span>
-                </div>
-                <div class="condition-item" v-if="education_level">
-                  <span class="condition-label">Образование:</span>
-                  <span class="condition-value">{{ education_level }}</span>
-                </div>
-              </div>
-            </div>
             <div class="vacancy-benefits" v-if="benefits">
               <h2 class="description-title">Преимущества</h2>
               <p class="description-text">{{ benefits }}</p>
             </div>
-            <div class="vacancy-salary" v-if="salary">
-              <h2 class="description-title">Зарплата</h2>
-              <p class="description-text">{{ salary }} ₽</p>
+            <div class="vacancy-conditions" v-if="hasConditions">
+              <h2 class="description-title">Условия работы</h2>
+              <div class="conditions-grid">
+                <div class="condition-item" v-if="work_schedule">
+                  <i class="pi pi-clock"></i>
+                  <span>{{ getWorkScheduleName(work_schedule) }}</span>
+                </div>
+                <div class="condition-item" v-if="employment_type">
+                  <i class="pi pi-briefcase"></i>
+                  <span>{{ getEmploymentTypeName(employment_type) }}</span>
+                </div>
+                <div class="condition-item" v-if="experience_level">
+                  <i class="pi pi-star"></i>
+                  <span>{{ getExperienceLevelName(experience_level) }}</span>
+                </div>
+                <div class="condition-item" v-if="education_level">
+                  <i class="pi pi-graduation-cap"></i>
+                  <span>{{ getEducationLevelName(education_level) }}</span>
+                </div>
+                <div class="condition-item salary" v-if="salary">
+                  <i class="pi pi-money-bill"></i>
+                  <span>{{ formatSalary(salary) }} ₽</span>
+                </div>
+              </div>
             </div>
             <div class="vacancy-additional-conditions" v-if="hasAdditionalConditions">
               <h2 class="description-title">Дополнительные условия</h2>
@@ -381,6 +381,63 @@ const getStatusText = (status) => {
   };
   return statusMap[status] || status;
 };
+
+const getWorkScheduleName = (schedule) => {
+  const schedules = {
+    'full_time': 'Полный день',
+    'part_time': 'Частичная занятость',
+    'flexible': 'Гибкий график'
+  };
+  return schedules[schedule] || schedule;
+};
+
+const getEmploymentTypeName = (type) => {
+  const types = {
+    'full_time': 'Полная занятость',
+    'part_time': 'Частичная занятость',
+    'project': 'Проектная работа',
+    'internship': 'Стажировка'
+  };
+  return types[type] || type;
+};
+
+const getExperienceLevelName = (level) => {
+  const levels = {
+    'no_experience': 'Без опыта',
+    'less_than_year': 'До 1 года',
+    '1-3_years': '1-3 года',
+    '3-5_years': '3-5 лет',
+    'more_than_5_years': 'Более 5 лет'
+  };
+  return levels[level] || level;
+};
+
+const getEducationLevelName = (level) => {
+  const levels = {
+    'secondary': 'Среднее образование',
+    'bachelor': 'Бакалавриат',
+    'master': 'Магистратура',
+    'phd': 'Аспирантура'
+  };
+  return levels[level] || level;
+};
+
+const formatSalary = (salary) => {
+  return new Intl.NumberFormat('ru-RU').format(salary);
+};
+
+const getCategoryName = (category) => {
+  const categories = {
+    'development': 'Разработка',
+    'design': 'Дизайн',
+    'marketing': 'Маркетинг',
+    'management': 'Менеджмент',
+    'sales': 'Продажи',
+    'support': 'Поддержка',
+    'other': 'Другое'
+  };
+  return categories[category] || category;
+};
 </script>
 
 <style scoped>
@@ -472,7 +529,7 @@ const getStatusText = (status) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.75rem;
   background-color: var(--surface-ground);
   border-radius: 8px;
   color: var(--text-color);
@@ -481,6 +538,11 @@ const getStatusText = (status) => {
 .condition-item i {
   color: var(--primary-color);
   font-size: 1.2rem;
+}
+
+.condition-item.salary {
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
 .benefits {
@@ -558,5 +620,54 @@ const getStatusText = (status) => {
 .application-status.accepted {
   background-color: var(--success-color);
   color: white;
+}
+
+.vacancy-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color-secondary);
+}
+
+.detail-item i {
+  color: var(--primary-color);
+}
+
+.detail-item.salary {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.vacancy-benefits {
+  margin: 1.5rem 0;
+  background-color: var(--surface-ground);
+  border-radius: 8px;
+}
+
+.vacancy-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--surface-ground);
+  border-radius: 4px;
+}
+
+.feature i {
+  color: var(--primary-color);
 }
 </style>

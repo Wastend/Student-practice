@@ -13,7 +13,7 @@ const getAllJobs = async (filters) => {
         LEFT JOIN applications a ON j.id = a.job_id AND a.student_id = ?
         WHERE 1=1
     `;
-    const params = [filters.student_id];
+    const params = [filters.student_id || null];
 
     if (filters.status) {
         query += ' AND j.status = ?';
@@ -30,8 +30,32 @@ const getAllJobs = async (filters) => {
         params.push(filters.location);
     }
 
-    const [rows] = await pool.query(query, params);
-    return rows;
+    if (filters.experience_level) {
+        query += ' AND j.experience_level = ?';
+        params.push(filters.experience_level);
+    }
+
+    if (filters.employment_type) {
+        query += ' AND j.employment_type = ?';
+        params.push(filters.employment_type);
+    }
+
+    if (filters.search) {
+        query += ' AND (j.title LIKE ? OR j.description LIKE ?)';
+        const searchTerm = `%${filters.search}%`;
+        params.push(searchTerm, searchTerm);
+    }
+
+    // Добавляем сортировку по дате создания
+    query += ' ORDER BY j.created_at DESC';
+
+    try {
+        const [rows] = await pool.query(query, params);
+        return rows;
+    } catch (error) {
+        console.error('Ошибка при получении вакансий:', error);
+        throw error;
+    }
 };
 
 const getJobById = async (id) => {
@@ -179,6 +203,15 @@ const getJobApplication = async (jobId, studentId) => {
     return rows[0];
 };
 
+const getJobs = async (query = {}) => {
+    try {
+        return await Job.find(query).sort({ created_at: -1 });
+    } catch (error) {
+        console.error('Ошибка при получении вакансий:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
@@ -186,5 +219,6 @@ module.exports = {
     updateJob,
     deleteJob,
     applyForJob,
-    getJobApplication
+    getJobApplication,
+    getJobs
 };

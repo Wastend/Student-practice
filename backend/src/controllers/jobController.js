@@ -5,12 +5,23 @@ const { OpenAI } = require("openai");
 
 const getAllJobs = async (req, res) => {
     try {
-        const filters = req.query;
+        const filters = {
+            ...req.query,
+            student_id: req.user?.id // Добавляем ID студента, если пользователь авторизован
+        };
+        
+        console.log('Получение вакансий с фильтрами:', filters);
+        
         const jobs = await jobModel.getAllJobs(filters);
+        console.log('Получено вакансий:', jobs.length);
+        
         res.json(jobs);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error('Ошибка при получении вакансий:', error);
+        res.status(500).json({ 
+            message: 'Ошибка сервера',
+            error: error.message 
+        });
     }
 };
 
@@ -199,6 +210,53 @@ const applyForJob = async (req, res) => {
     }
 };
 
+const getJobs = async (req, res) => {
+    try {
+        const { status, category, location, experience_level, employment_type, search } = req.query;
+        
+        let query = {};
+        
+        // Фильтр по статусу
+        if (status) {
+            query.status = status;
+        }
+        
+        // Фильтр по категории
+        if (category) {
+            query.category = category;
+        }
+        
+        // Фильтр по городу
+        if (location) {
+            query.location = location;
+        }
+        
+        // Фильтр по опыту
+        if (experience_level) {
+            query.experience_level = experience_level;
+        }
+        
+        // Фильтр по типу занятости
+        if (employment_type) {
+            query.employment_type = employment_type;
+        }
+        
+        // Поиск по тексту
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } }
+            ];
+        }
+        
+        const jobs = await jobModel.getJobs(query);
+        res.json(jobs);
+    } catch (error) {
+        console.error('Ошибка при получении вакансий:', error);
+        res.status(500).json({ message: 'Внутренняя ошибка сервера' });
+    }
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
@@ -206,5 +264,6 @@ module.exports = {
     updateJob,
     deleteJob,
     generateTest,
-    applyForJob
+    applyForJob,
+    getJobs
 };
