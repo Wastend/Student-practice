@@ -1,4 +1,5 @@
 const jobModel = require('../models/jobModel');
+const jobApplicationModel = require('../models/jobApplicationModel');
 const { Configuration, OpenAIApi } = require("openai");
 const { OpenAI } = require("openai");
 
@@ -163,6 +164,29 @@ const generateTest = async (req, res) => {
     }
 };
 
+const applyForJob = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const studentId = req.user.id;
+
+        // Проверяем существование вакансии
+        const job = await jobModel.getJobById(id);
+        if (!job) {
+            return res.status(404).json({ message: 'Вакансия не найдена' });
+        }
+
+        // Создаем отклик
+        const application = await jobModel.applyForJob(id, studentId);
+        res.status(201).json(application);
+    } catch (error) {
+        console.error('Ошибка при отклике на вакансию:', error);
+        if (error.message === 'Вы уже откликались на эту вакансию') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
@@ -170,4 +194,5 @@ module.exports = {
     updateJob,
     deleteJob,
     generateTest,
+    applyForJob
 };

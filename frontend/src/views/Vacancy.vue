@@ -23,7 +23,27 @@
   import axios from "axios";
 
   const route = useRoute();
-  const vacancy = ref({});
+  const vacancy = ref({
+    title: '',
+    category: '',
+    location: '',
+    description: '',
+    responsibilities: [],
+    requirements: [],
+    salary: 0,
+    remote: false,
+    test_id: null,
+    tags: [],
+    work_schedule: '',
+    employment_type: '',
+    experience_level: '',
+    education_level: '',
+    benefits: '',
+    mentor_support: false,
+    certificate: false,
+    possibility_of_employment: false,
+    paid: false
+  });
   const company = ref({});
 
   const fetchVacancy = async () => {

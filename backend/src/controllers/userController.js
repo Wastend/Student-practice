@@ -54,7 +54,23 @@ const loginUser = async (req, res) => {
         }
 
         const token = jwt.sign({ id: user.id, role: user.role_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token });
+        
+        // Отправляем токен и данные пользователя
+        const response = { 
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role_id,
+                company_name: user.company_name,
+                company_website: user.company_website,
+                company_description: user.company_description
+            }
+        };
+        
+        console.log('Login Response:', response); // Отладочная информация
+        res.json(response);
     } catch (error) {
         console.error('Ошибка при входе:', error);
         res.status(500).json({ message: 'Ошибка сервера' });

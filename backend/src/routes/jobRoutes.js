@@ -9,5 +9,6 @@ router.post('/', authenticateToken, jobController.createJob);
 router.put('/:id', authenticateToken, jobController.updateJob);
 router.delete('/:id', authenticateToken, jobController.deleteJob);
 router.post('/generate-test', authenticateToken, jobController.generateTest);
+router.post('/:id/apply', authenticateToken, jobController.applyForJob);
 
 module.exports = router; 

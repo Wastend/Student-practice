@@ -218,3 +218,29 @@ export const uploadCoverLetter = async (file) => {
     });
     return response.data;
 };
+
+// Получение откликов для компании
+export const getCompanyApplications = async () => {
+  try {
+    const response = await axiosInstance.get("/applications/company");
+    console.log('Company applications response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching company applications:', error);
+    throw error;
+  }
+};
+
+// Обновление статуса отклика
+export const updateApplicationStatus = async (applicationId, status) => {
+  const response = await axiosInstance.patch(`/applications/${applicationId}/status`, { status });
+  return response.data;
+};
+
+// Скачивание сопроводительного письма студента
+export const downloadStudentCoverLetter = async (coverLetterId) => {
+  const response = await axiosInstance.get(`/cover-letters/${coverLetterId}/download`, {
+    responseType: 'blob'
+  });
+  return response.data;
+};

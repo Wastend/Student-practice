@@ -138,10 +138,45 @@ const deleteJob = async (id) => {
     return result;
 };
 
+const applyForJob = async (jobId, studentId) => {
+    try {
+        // Проверяем, не откликался ли уже студент
+        const [existing] = await pool.query(
+            'SELECT * FROM applications WHERE job_id = ? AND student_id = ?',
+            [jobId, studentId]
+        );
+
+        if (existing.length > 0) {
+            throw new Error('Вы уже откликались на эту вакансию');
+        }
+
+        // Создаем отклик
+        const [result] = await pool.query(
+            'INSERT INTO applications (job_id, student_id, status) VALUES (?, ?, "applied")',
+            [jobId, studentId]
+        );
+
+        return { id: result.insertId, job_id: jobId, student_id: studentId, status: 'applied' };
+    } catch (error) {
+        console.error('Ошибка при отклике на вакансию:', error);
+        throw error;
+    }
+};
+
+const getJobApplication = async (jobId, studentId) => {
+    const [rows] = await pool.query(
+        'SELECT * FROM applications WHERE job_id = ? AND student_id = ?',
+        [jobId, studentId]
+    );
+    return rows[0];
+};
+
 module.exports = {
     getAllJobs,
     getJobById,
     createJob,
     updateJob,
     deleteJob,
+    applyForJob,
+    getJobApplication
 };

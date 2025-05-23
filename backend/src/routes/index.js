@@ -34,8 +34,10 @@ router.post('/generate-test', authenticateToken, jobController.generateTest);
 
 // Маршруты для заявок
 router.get('/applications', applicationController.getAllApplications);
+router.get('/applications/company', authenticateToken, applicationController.getCompanyApplications);
 router.get('/applications/:id', applicationController.getApplicationById);
 router.post('/applications', applicationController.createApplication);
+router.patch('/applications/:id/status', authenticateToken, applicationController.updateApplicationStatus);
 
 // Маршруты для тестов
 router.get('/tests', authenticateToken, testController.getAllTests);

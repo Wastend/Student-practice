@@ -13,6 +13,47 @@
               <Tag v-if="company?.name" class="vacancy-company" severity="warning">{{ company.name }}</Tag>
               <Tag v-if="remote" class="vacancy-remote" severity="info">Удаленная работа</Tag>
             </div>
+            <div class="vacancy-actions">
+              <template v-if="isAuthenticated">
+                <template v-if="userRole === 1">
+                  <template v-if="test_id">
+                    <Button
+                      v-if="!hasPassedTest"
+                      label="Пройти тест"
+                      class="btn-primary"
+                      @click="goToTest"
+                    />
+                    <Button
+                      v-else
+                      label="Откликнуться"
+                      class="btn-primary"
+                      @click="applyForVacancy"
+                    />
+                  </template>
+                  <Button
+                    v-else
+                    label="Откликнуться"
+                    class="btn-primary"
+                    @click="applyForVacancy"
+                  />
+                </template>
+                <template v-else-if="userRole === 2">
+                  <Button
+                    label="Откликнуться"
+                    class="btn-primary"
+                    @click="showCompanyWarning"
+                    disabled
+                  />
+                </template>
+              </template>
+              <template v-else>
+                <Button
+                  label="Откликнуться"
+                  class="btn-primary"
+                  @click="showAuthWarning"
+                />
+              </template>
+            </div>
             <div class="vacancy-tags" v-if="tags && tags.length">
               <Tag v-for="tag in tags" :key="tag.id" class="vacancy-tag" severity="help">
                 {{ tag.name }}
@@ -88,47 +129,6 @@
                 </div>
               </div>
             </div>
-            <div class="vacancy-actions">
-              <template v-if="isAuthenticated">
-                <template v-if="userRole === 'student'">
-                  <template v-if="test_id">
-                    <Button
-                      v-if="!hasPassedTest"
-                      label="Пройти тест"
-                      class="btn-primary"
-                      @click="goToTest"
-                    />
-                    <Button
-                      v-else
-                      label="Откликнуться"
-                      class="btn-primary"
-                      @click="applyForVacancy"
-                    />
-                  </template>
-                  <Button
-                    v-else
-                    label="Откликнуться"
-                    class="btn-primary"
-                    @click="applyForVacancy"
-                  />
-                </template>
-                <template v-else-if="userRole === 'company'">
-                  <Button
-                    label="Откликнуться"
-                    class="btn-primary"
-                    @click="showCompanyWarning"
-                    disabled
-                  />
-                </template>
-              </template>
-              <template v-else>
-                <Button
-                  label="Откликнуться"
-                  class="btn-primary"
-                  @click="showAuthWarning"
-                />
-              </template>
-            </div>
           </template>
         </Card>
       </div>
@@ -143,6 +143,7 @@ import { computed, ref, onMounted } from 'vue';
 import { getTags } from "@/api";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
+import axios from 'axios';
 
 const router = useRouter();
 const toast = useToast();
@@ -150,28 +151,118 @@ const authStore = useAuthStore();
 const availableTags = ref([]);
 const hasPassedTest = ref(false);
 
+// Отладочная информация
+console.log('Auth Store State:', {
+  user: authStore.user,
+  token: authStore.token,
+  isAuthenticated: authStore.isAuthenticated,
+  userRole: authStore.user?.role
+});
+
+// Проверяем состояние при монтировании компонента
+onMounted(() => {
+  console.log('Component Mounted - Auth State:', {
+    user: authStore.user,
+    token: authStore.token,
+    isAuthenticated: authStore.isAuthenticated,
+    userRole: authStore.user?.role
+  });
+});
+
 const props = defineProps({
-  title: String,
-  category: String,
-  location: String,
-  company: Object,
-  description: String,
-  responsibilities: Array,
-  requirements: Array,
-  salary: Number,
-  remote: Boolean,
-  test_id: [String, Number],
-  tags: Array,
-  work_schedule: String,
-  employment_type: String,
-  experience_level: String,
-  education_level: String,
-  benefits: String,
-  mentor_support: Boolean,
-  certificate: Boolean,
-  possibility_of_employment: Boolean,
-  paid: Boolean,
-  vacancyId: [String, Number]
+  title: {
+    type: String,
+    required: true,
+    default: ''
+  },
+  category: {
+    type: String,
+    required: true,
+    default: ''
+  },
+  location: {
+    type: String,
+    required: true,
+    default: ''
+  },
+  company: {
+    type: Object,
+    default: () => ({})
+  },
+  description: {
+    type: String,
+    default: ''
+  },
+  responsibilities: {
+    type: Array,
+    default: () => []
+  },
+  requirements: {
+    type: Array,
+    default: () => []
+  },
+  salary: {
+    type: [Number, String],
+    required: true,
+    default: 0
+  },
+  remote: {
+    type: [Boolean, Number],
+    required: true,
+    default: false
+  },
+  test_id: {
+    type: [String, Number],
+    default: null
+  },
+  tags: {
+    type: Array,
+    default: () => []
+  },
+  work_schedule: {
+    type: String,
+    default: ''
+  },
+  employment_type: {
+    type: String,
+    default: ''
+  },
+  experience_level: {
+    type: String,
+    default: ''
+  },
+  education_level: {
+    type: String,
+    default: ''
+  },
+  benefits: {
+    type: String,
+    default: ''
+  },
+  mentor_support: {
+    type: [Boolean, Number],
+    required: true,
+    default: false
+  },
+  certificate: {
+    type: [Boolean, Number],
+    required: true,
+    default: false
+  },
+  possibility_of_employment: {
+    type: [Boolean, Number],
+    required: true,
+    default: false
+  },
+  paid: {
+    type: [Boolean, Number],
+    required: true,
+    default: false
+  },
+  vacancyId: {
+    type: [String, Number],
+    default: null
+  }
 });
 
 const getTagName = (tagId) => {
@@ -203,6 +294,13 @@ const goToTest = () => {
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 const userRole = computed(() => authStore.user?.role);
+
+// Добавляем отладочную информацию
+console.log('Auth State in VacancyHeader:', {
+  isAuthenticated: isAuthenticated.value,
+  userRole: userRole.value,
+  user: authStore.user
+});
 
 const showCompanyWarning = () => {
   toast.add({
@@ -238,11 +336,26 @@ const applyForVacancy = async () => {
     toast.add({
       severity: 'error',
       summary: 'Ошибка',
-      detail: 'Не удалось отправить отклик',
+      detail: error.response?.data?.message || 'Не удалось отправить отклик',
       life: 3000
     });
   }
 };
+
+// Преобразуем числовые значения в булевы
+const isRemote = computed(() => Boolean(props.remote));
+const hasMentorSupport = computed(() => Boolean(props.mentor_support));
+const hasCertificate = computed(() => Boolean(props.certificate));
+const hasEmploymentPossibility = computed(() => Boolean(props.possibility_of_employment));
+const isPaid = computed(() => Boolean(props.paid));
+
+// Преобразуем строковую зарплату в число
+const formattedSalary = computed(() => {
+  if (typeof props.salary === 'string') {
+    return parseFloat(props.salary);
+  }
+  return props.salary;
+});
 </script>
 
 <style scoped>
@@ -367,7 +480,7 @@ const applyForVacancy = async () => {
 }
 
 .vacancy-actions {
-  margin-top: 2rem;
+  margin: 1.5rem 0;
   display: flex;
   gap: 1rem;
   justify-content: flex-start;
@@ -375,5 +488,23 @@ const applyForVacancy = async () => {
 
 .btn-primary {
   min-width: 200px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-600);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 </style>

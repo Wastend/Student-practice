@@ -6,7 +6,7 @@ export const useAuthStore = defineStore("auth", {
     token: localStorage.getItem("token") || null,
   }),
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.token && !!state.user,
   },
   actions: {
     setUser(user) {
@@ -20,6 +20,7 @@ export const useAuthStore = defineStore("auth", {
     logout() {
       this.user = null;
       this.token = null;
+      localStorage.removeItem("user");
       localStorage.removeItem("token");
     },
   },

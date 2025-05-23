@@ -34,11 +34,13 @@ import { useRouter } from "vue-router";
 import { login } from "../api";
 import { saveToken } from "../utils/auth";
 import { useToast } from "primevue/usetoast";
+import { useAuthStore } from "../stores/auth";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 const toast = useToast();
+const authStore = useAuthStore();
 
 const form = ref({
   email,
@@ -48,7 +50,16 @@ const form = ref({
 const handleSubmit = async () => {
   try {
     const response = await login(form.value.email, form.value.password);
+    console.log('Login Response:', response); // Отладочная информация
+    
+    // Сохраняем токен и данные пользователя
     saveToken(response.token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    
+    // Обновляем store
+    authStore.setToken(response.token);
+    authStore.setUser(response.user);
+    
     router.push("/profile");
   } catch (error) {
     console.error("Ошибка при входе:", error);

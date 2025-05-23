@@ -61,11 +61,82 @@
                 <p>У вас пока нет отправленных заявок</p>
                 <Button label="Найти вакансии" class="p-button-outlined" @click="router.push('/vacancies')" />
               </div>
-              <ul v-else>
-                <li v-for="application in applications" :key="application.id">
-                  <strong>{{ application.job_title }}</strong> - {{ application.status }}
-                </li>
-              </ul>
+              <div v-else class="applications-list">
+                <div v-for="application in applications" :key="application.id" class="application-item">
+                  <div class="application-info">
+                    <router-link :to="`/vacancies/${application.job_id}`" class="job-title">
+                      {{ application.job_title }}
+                    </router-link>
+                    <span class="application-status" :class="application.status">
+                      {{ getStatusText(application.status) }}
+                    </span>
+                  </div>
+                  <div class="application-date">
+                    Отправлена: {{ new Date(application.applied_at).toLocaleDateString('ru-RU') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="user.role_id === 2" class="applications-section">
+              <h3>Отклики на вакансии</h3>
+              <div v-if="companyApplications.length === 0" class="no-data-message">
+                <i class="pi pi-send" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
+                <p>У вас пока нет откликов на вакансии</p>
+              </div>
+              <div v-else class="applications-list">
+                <div v-for="application in companyApplications" :key="application.id" class="application-item">
+                  <div class="application-info">
+                    <div class="application-main">
+                      <router-link :to="`/vacancies/${application.job_id}`" class="job-title">
+                        {{ application.job_title }}
+                      </router-link>
+                      <div class="student-info">
+                        <span class="student-name">{{ application.student_name }}</span>
+                        <span class="student-email">{{ application.student_email }}</span>
+                        <span class="application-date">
+                          Отправлена: {{ new Date(application.applied_at).toLocaleDateString('ru-RU') }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="application-actions">
+                      <span class="application-status" :class="application.status">
+                        {{ getStatusText(application.status) }}
+                      </span>
+                      <Button 
+                        v-if="application.cover_letter_id"
+                        icon="pi pi-file" 
+                        class="p-button-text" 
+                        @click="downloadStudentCoverLetter(application.cover_letter_id)"
+                        v-tooltip.top="'Скачать сопроводительное письмо'"
+                      />
+                      <div class="status-actions">
+                        <Button 
+                          v-if="application.status === 'applied'"
+                          icon="pi pi-check" 
+                          class="p-button-text p-button-success" 
+                          @click="updateApplicationStatus(application.id, 'interview')"
+                          v-tooltip.top="'Пригласить на собеседование'"
+                        />
+                        <Button 
+                          v-if="application.status === 'interview'"
+                          icon="pi pi-check" 
+                          class="p-button-text p-button-success" 
+                          @click="updateApplicationStatus(application.id, 'accepted')"
+                          v-tooltip.top="'Принять'"
+                        />
+                        <Button 
+                          v-if="['applied', 'interview'].includes(application.status)"
+                          icon="pi pi-times" 
+                          class="p-button-text p-button-danger" 
+                          @click="updateApplicationStatus(application.id, 'rejected')"
+                          v-tooltip.top="'Отклонить'"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Секция сопроводительного письма -->
@@ -95,7 +166,7 @@
                     />
                   </div>
                 </div>
-                <div class="file-upload">
+                <div v-else class="file-upload">
                   <FileUpload
                     mode="basic"
                     :auto="false"
@@ -172,8 +243,11 @@ import {
   deleteJob, 
   uploadCoverLetter, 
   downloadCoverLetterFile, 
-  deleteCoverLetter 
-} from "@/api";
+  deleteCoverLetter,
+  getCompanyApplications,
+  updateApplicationStatus as updateApplicationStatusAPI,
+  downloadStudentCoverLetter as downloadStudentCoverLetterAPI
+} from "@/api/index";
 
 const router = useRouter();
 const toast = useToast();
@@ -191,6 +265,7 @@ const editForm = ref({
 });
 const isLoading = ref(true);
 const coverLetter = ref(null);
+const companyApplications = ref([]);
 
 onMounted(async () => {
   isLoading.value = true;
@@ -201,8 +276,10 @@ onMounted(async () => {
     if (user.value.role_id === 2) {
       try {
         vacancies.value = await getJobs({ employer_id: user.value.id });
+        companyApplications.value = await getCompanyApplications();
       } catch (error) {
         vacancies.value = [];
+        companyApplications.value = [];
       }
 
       try {
@@ -376,6 +453,62 @@ const removeCoverLetter = async () => {
     });
   }
 };
+
+const getStatusText = (status) => {
+  const statusMap = {
+    'applied': 'Отправлена',
+    'interview': 'Собеседование',
+    'rejected': 'Отклонена',
+    'accepted': 'Принята'
+  };
+  return statusMap[status] || status;
+};
+
+const updateApplicationStatus = async (applicationId, newStatus) => {
+  try {
+    await updateApplicationStatusAPI(applicationId, newStatus);
+    const application = companyApplications.value.find(app => app.id === applicationId);
+    if (application) {
+      application.status = newStatus;
+    }
+    toast.add({
+      severity: 'success',
+      summary: 'Успех',
+      detail: 'Статус заявки обновлен',
+      life: 3000
+    });
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса заявки:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: 'Не удалось обновить статус заявки',
+      life: 3000
+    });
+  }
+};
+
+const downloadStudentCoverLetter = async (coverLetterId) => {
+  try {
+    const response = await downloadStudentCoverLetterAPI(coverLetterId);
+    const url = window.URL.createObjectURL(new Blob([response]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `cover_letter_${coverLetterId}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Ошибка при скачивании сопроводительного письма:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: 'Не удалось скачать сопроводительное письмо',
+      life: 3000
+    });
+  }
+};
 </script>
 
 <style scoped>
@@ -514,5 +647,100 @@ const removeCoverLetter = async () => {
 
 .no-data-message .p-button {
   margin-top: 1rem;
+}
+
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.application-item {
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--surface-ground);
+}
+
+.application-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.job-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.job-title:hover {
+  text-decoration: underline;
+}
+
+.application-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+}
+
+.application-status.applied {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.application-status.interview {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.application-status.rejected {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.application-status.accepted {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.application-date {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+}
+
+.application-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.student-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.student-email {
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+}
+
+.application-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 </style>

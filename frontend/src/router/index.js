@@ -7,6 +7,7 @@ import Profile from "../views/Profile.vue";
 import Register from "../views/Register.vue";
 import Vacancies from "../views/Vacancies.vue";
 import Vacancy from "../views/Vacancy.vue";
+import { checkAuth } from './authMiddleware';
 
 const routes = [
   {
@@ -69,8 +70,15 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+// Глобальный навигационный guard
+router.beforeEach(async (to, from, next) => {
+  // Проверяем авторизацию при каждом переходе
+  await checkAuth();
+  next();
 });
 
 export default router;

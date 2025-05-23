@@ -2,7 +2,21 @@ const applicationModel = require('../models/applicationModel');
 
 const getAllApplications = async (req, res) => {
     try {
-        const applications = await applicationModel.getAllApplications();
+        const filters = {};
+        if (req.query.student_id) {
+            filters.student_id = req.query.student_id;
+        }
+        const applications = await applicationModel.getAllApplications(filters);
+        res.json(applications);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
+const getCompanyApplications = async (req, res) => {
+    try {
+        const applications = await applicationModel.getCompanyApplications(req.user.id);
         res.json(applications);
     } catch (error) {
         console.error(error);
@@ -33,8 +47,24 @@ const createApplication = async (req, res) => {
     }
 };
 
+const updateApplicationStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const application = await applicationModel.updateApplicationStatus(req.params.id, status);
+        if (!application) {
+            return res.status(404).json({ message: 'Заявка не найдена' });
+        }
+        res.json(application);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Ошибка сервера' });
+    }
+};
+
 module.exports = {
     getAllApplications,
+    getCompanyApplications,
     getApplicationById,
     createApplication,
+    updateApplicationStatus
 };
