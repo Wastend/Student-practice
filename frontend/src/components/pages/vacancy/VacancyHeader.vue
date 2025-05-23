@@ -88,12 +88,47 @@
                 </div>
               </div>
             </div>
-            <Button
-              label="Пройти тест"
-              class="btn-primary mt-2"
-              @click="goToTest"
-              v-if="test_id"
-            />
+            <div class="vacancy-actions">
+              <template v-if="isAuthenticated">
+                <template v-if="userRole === 'student'">
+                  <template v-if="test_id">
+                    <Button
+                      v-if="!hasPassedTest"
+                      label="Пройти тест"
+                      class="btn-primary"
+                      @click="goToTest"
+                    />
+                    <Button
+                      v-else
+                      label="Откликнуться"
+                      class="btn-primary"
+                      @click="applyForVacancy"
+                    />
+                  </template>
+                  <Button
+                    v-else
+                    label="Откликнуться"
+                    class="btn-primary"
+                    @click="applyForVacancy"
+                  />
+                </template>
+                <template v-else-if="userRole === 'company'">
+                  <Button
+                    label="Откликнуться"
+                    class="btn-primary"
+                    @click="showCompanyWarning"
+                    disabled
+                  />
+                </template>
+              </template>
+              <template v-else>
+                <Button
+                  label="Откликнуться"
+                  class="btn-primary"
+                  @click="showAuthWarning"
+                />
+              </template>
+            </div>
           </template>
         </Card>
       </div>
@@ -106,9 +141,14 @@ import { Card, Tag, Button } from "primevue";
 import { useRouter } from "vue-router";
 import { computed, ref, onMounted } from 'vue';
 import { getTags } from "@/api";
+import { useToast } from "primevue/usetoast";
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
+const toast = useToast();
+const authStore = useAuthStore();
 const availableTags = ref([]);
+const hasPassedTest = ref(false);
 
 const props = defineProps({
   title: String,
@@ -130,7 +170,8 @@ const props = defineProps({
   mentor_support: Boolean,
   certificate: Boolean,
   possibility_of_employment: Boolean,
-  paid: Boolean
+  paid: Boolean,
+  vacancyId: [String, Number]
 });
 
 const getTagName = (tagId) => {
@@ -157,6 +198,49 @@ const hasAdditionalConditions = computed(() => {
 const goToTest = () => {
   if (props.test_id) {
     router.push(`/tests/${props.test_id}/take`);
+  }
+};
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const userRole = computed(() => authStore.user?.role);
+
+const showCompanyWarning = () => {
+  toast.add({
+    severity: 'warn',
+    summary: 'Внимание',
+    detail: 'Откликаться на вакансии могут только студенты',
+    life: 3000
+  });
+};
+
+const showAuthWarning = () => {
+  toast.add({
+    severity: 'info',
+    summary: 'Требуется авторизация',
+    detail: 'Для отклика на вакансию необходимо авторизоваться',
+    life: 3000
+  });
+};
+
+const applyForVacancy = async () => {
+  try {
+    const response = await axios.post(`http://localhost:3000/api/jobs/${props.vacancyId}/apply`, {
+      userId: authStore.user.id
+    });
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Успешно',
+      detail: 'Ваш отклик успешно отправлен',
+      life: 3000
+    });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Ошибка',
+      detail: 'Не удалось отправить отклик',
+      life: 3000
+    });
   }
 };
 </script>
@@ -280,5 +364,16 @@ const goToTest = () => {
 
 .vacancy-additional-conditions {
   margin-top: 2rem;
+}
+
+.vacancy-actions {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.btn-primary {
+  min-width: 200px;
 }
 </style>

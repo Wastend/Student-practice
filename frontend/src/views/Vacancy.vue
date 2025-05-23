@@ -10,7 +10,8 @@
         :mentor_support="vacancy.mentor_support"
         :certificate="vacancy.certificate"
         :possibility_of_employment="vacancy.possibility_of_employment"
-        :paid="vacancy.paid" />
+        :paid="vacancy.paid"
+        :vacancyId="route.params.id" />
     </div>
   </div>
 </template>
