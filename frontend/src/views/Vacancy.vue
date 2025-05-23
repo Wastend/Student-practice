@@ -11,7 +11,9 @@
         :certificate="vacancy.certificate"
         :possibility_of_employment="vacancy.possibility_of_employment"
         :paid="vacancy.paid"
-        :vacancyId="route.params.id" />
+        :vacancyId="route.params.id"
+        :has_applied="vacancy.has_applied"
+        :application_status="vacancy.application_status" />
     </div>
   </div>
 </template>
@@ -21,8 +23,10 @@
   import { useRoute } from "vue-router";
   import VacancyHeader from "@/components/pages/vacancy/VacancyHeader.vue";
   import axios from "axios";
+  import { useAuthStore } from "@/stores/auth";
 
   const route = useRoute();
+  const authStore = useAuthStore();
   const vacancy = ref({
     title: '',
     category: '',
@@ -42,13 +46,19 @@
     mentor_support: false,
     certificate: false,
     possibility_of_employment: false,
-    paid: false
+    paid: false,
+    has_applied: false,
+    application_status: ''
   });
   const company = ref({});
 
   const fetchVacancy = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/jobs/${route.params.id}`);
+      const response = await axios.get(`http://localhost:3000/api/jobs/${route.params.id}`, {
+        params: {
+          student_id: authStore.user?.id
+        }
+      });
       vacancy.value = response.data;
       console.log('Данные вакансии:', vacancy.value);
 

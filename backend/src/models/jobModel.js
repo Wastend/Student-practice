@@ -4,21 +4,29 @@ const requirementModel = require('./requirementModel');
 const tagModel = require('./tagModel');
 
 const getAllJobs = async (filters) => {
-    let query = 'SELECT * FROM jobs WHERE 1=1';
-    const params = [];
+    let query = `
+        SELECT 
+            j.*,
+            CASE WHEN a.id IS NOT NULL THEN true ELSE false END as has_applied,
+            a.status as application_status
+        FROM jobs j
+        LEFT JOIN applications a ON j.id = a.job_id AND a.student_id = ?
+        WHERE 1=1
+    `;
+    const params = [filters.student_id];
 
     if (filters.status) {
-        query += ' AND status = ?';
+        query += ' AND j.status = ?';
         params.push(filters.status);
     }
 
     if (filters.category) {
-        query += ' AND category = ?';
+        query += ' AND j.category = ?';
         params.push(filters.category);
     }
 
     if (filters.location) {
-        query += ' AND location = ?';
+        query += ' AND j.location = ?';
         params.push(filters.location);
     }
 

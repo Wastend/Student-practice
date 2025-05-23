@@ -16,14 +16,26 @@ const getAllJobs = async (req, res) => {
 
 const getJobById = async (req, res) => {
     try {
-        const job = await jobModel.getJobById(req.params.id);
+        const jobId = req.params.id;
+        const studentId = req.query.student_id;
+        
+        let job = await jobModel.getJobById(jobId);
+        
         if (!job) {
             return res.status(404).json({ message: 'Вакансия не найдена' });
         }
+
+        // Если передан student_id, проверяем, откликался ли студент
+        if (studentId) {
+            const application = await jobModel.getJobApplication(jobId, studentId);
+            job.has_applied = !!application;
+            job.application_status = application?.status || '';
+        }
+        
         res.json(job);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Ошибка сервера' });
+        console.error('Ошибка при получении вакансии:', error);
+        res.status(500).json({ message: 'Внутренняя ошибка сервера' });
     }
 };
 

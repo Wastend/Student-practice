@@ -16,13 +16,26 @@
             <div class="vacancy-actions">
               <template v-if="isAuthenticated">
                 <template v-if="userRole === 1">
-                  <template v-if="test_id">
-                    <Button
-                      v-if="!hasPassedTest"
-                      label="Пройти тест"
-                      class="btn-primary"
-                      @click="goToTest"
-                    />
+                  <template v-if="has_applied">
+                    <div class="application-status" :class="application_status">
+                      {{ getStatusText(application_status) }}
+                    </div>
+                  </template>
+                  <template v-else>
+                    <template v-if="test_id">
+                      <Button
+                        v-if="!hasPassedTest"
+                        label="Пройти тест"
+                        class="btn-primary"
+                        @click="goToTest"
+                      />
+                      <Button
+                        v-else
+                        label="Откликнуться"
+                        class="btn-primary"
+                        @click="applyForVacancy"
+                      />
+                    </template>
                     <Button
                       v-else
                       label="Откликнуться"
@@ -30,12 +43,6 @@
                       @click="applyForVacancy"
                     />
                   </template>
-                  <Button
-                    v-else
-                    label="Откликнуться"
-                    class="btn-primary"
-                    @click="applyForVacancy"
-                  />
                 </template>
                 <template v-else-if="userRole === 2">
                   <Button
@@ -140,7 +147,7 @@
 import { Card, Tag, Button } from "primevue";
 import { useRouter } from "vue-router";
 import { computed, ref, onMounted } from 'vue';
-import { getTags } from "@/api";
+import { getTags } from "@/api/index";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/auth";
 import axios from 'axios';
@@ -262,6 +269,14 @@ const props = defineProps({
   vacancyId: {
     type: [String, Number],
     default: null
+  },
+  has_applied: {
+    type: Boolean,
+    default: false
+  },
+  application_status: {
+    type: String,
+    default: ''
   }
 });
 
@@ -356,6 +371,16 @@ const formattedSalary = computed(() => {
   }
   return props.salary;
 });
+
+const getStatusText = (status) => {
+  const statusMap = {
+    'applied': 'Отклик отправлен',
+    'interview': 'Приглашение на собеседование',
+    'rejected': 'Отклонено',
+    'accepted': 'Принято'
+  };
+  return statusMap[status] || status;
+};
 </script>
 
 <style scoped>
@@ -506,5 +531,32 @@ const formattedSalary = computed(() => {
 .btn-primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.application-status {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.application-status.applied {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.application-status.interview {
+  background-color: var(--warning-color);
+  color: white;
+}
+
+.application-status.rejected {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.application-status.accepted {
+  background-color: var(--success-color);
+  color: white;
 }
 </style>
