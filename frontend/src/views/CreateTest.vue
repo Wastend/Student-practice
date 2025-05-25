@@ -103,7 +103,7 @@ import { Button, Card, Checkbox, InputText } from "primevue";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "primevue/usetoast";
-import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer, generateTestAPI } from "@/api";
+import { createTest, getTestById, updateTest, createQuestion, createAnswer, getQuestionsWithAnswers, updateQuestionsAndAnswers, deleteQuestion, deleteAnswer, generateTestAPI } from "../api";
 
 const router = useRouter();
 const route = useRoute();

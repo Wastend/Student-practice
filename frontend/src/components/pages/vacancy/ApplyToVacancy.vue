@@ -114,7 +114,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { Dialog, Button, FileUpload, Textarea, ProgressSpinner } from 'primevue';
 import { useToast } from 'primevue/usetoast';
-import { uploadCoverLetter, deleteCoverLetter, applyToVacancy, downloadCoverLetterFile } from '@/api';
+import { uploadCoverLetter, deleteCoverLetter, applyToVacancy, downloadCoverLetterFile } from '../../../api';
 
 const props = defineProps({
   visible: {

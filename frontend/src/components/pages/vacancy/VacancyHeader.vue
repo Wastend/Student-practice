@@ -4,7 +4,19 @@
       <div class="vacancy-header-wrap">
         <Card class="vacancy-card">
           <template #title>
-            <h1 class="vacancy-title">{{ title }}</h1>
+            <div class="vacancy-title-wrap">
+              <h1 class="vacancy-title">{{ title }}</h1>
+              <div class="vacancy-meta vacancy-meta-top">
+                <div class="company-info">
+                  <span class="company">{{ typeof company === 'object' ? company.company_name : company }}</span>
+                  <span class="location">{{ location }}</span>
+                </div>
+                <div class="vacancy-details">
+                  <span class="job-type">{{ jobType === 'practice' ? 'Практика' : 'Стажировка' }}</span>
+                  <span class="date">Опубликовано: {{ formatDate(posted_at) }}</span>
+                </div>
+              </div>
+            </div>
           </template>
           <template #content>
             <div class="vacancy-meta">
@@ -277,6 +289,19 @@ const props = defineProps({
   application_status: {
     type: String,
     default: ''
+  },
+  posted_at: {
+    type: String,
+    default: ''
+  },
+  jobType: {
+    type: String,
+    default: ''
+  },
+  vacancy: {
+    type: Object,
+    required: true,
+    default: () => ({})
   }
 });
 
@@ -438,6 +463,50 @@ const getCategoryName = (category) => {
   };
   return categories[category] || category;
 };
+
+const formatDate = (dateString) => {
+  console.log('Received date string:', dateString);
+  
+  if (!dateString) {
+    console.log('Date string is empty');
+    return 'Дата не указана';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    console.log('Parsed date:', date);
+    
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date');
+      return 'Некорректная дата';
+    }
+    
+    const options = {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Moscow'
+    };
+    
+    const formattedDate = new Intl.DateTimeFormat('ru-RU', options).format(date);
+    console.log('Formatted date:', formattedDate);
+    return formattedDate;
+  } catch (error) {
+    console.error('Ошибка форматирования даты:', error);
+    return 'Ошибка форматирования даты';
+  }
+};
+
+// Добавляем отладочную информацию при монтировании компонента
+onMounted(() => {
+  console.log('Vacancy props:', {
+    posted_at: props.posted_at,
+    jobType: props.jobType,
+    company: props.company
+  });
+});
 </script>
 
 <style scoped>
@@ -458,11 +527,51 @@ const getCategoryName = (category) => {
   color: var(--primary-color);
 }
 
+.vacancy-title-wrap {
+  margin-bottom: 2rem;
+}
+
 .vacancy-meta {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+}
+
+.vacancy-meta.vacancy-meta-top {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.company-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.company {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.vacancy-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.job-type {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.date {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
 }
 
 .vacancy-tags {

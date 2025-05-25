@@ -17,6 +17,20 @@
                 <InputText id="title" v-model="vacancy.title" required />
               </div>
 
+              <div class="form-group">
+                <label>Тип вакансии</label>
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <RadioButton inputId="practice" v-model="vacancy.jobType" value="practice" />
+                    <span>Практика</span>
+                  </label>
+                  <label class="radio-option">
+                    <RadioButton inputId="internship" v-model="vacancy.jobType" value="internship" />
+                    <span>Стажировка</span>
+                  </label>
+                </div>
+              </div>
+
               <!-- Описание вакансии -->
               <div class="form-group">
                 <label for="description">Описание</label>
@@ -105,7 +119,7 @@
                 <InputText id="location" v-model="vacancy.location" required />
               </div>
 
-              <div class="form-group">
+              <div class="form-group" style="flex-direction: row-reverse;justify-content: flex-end;">
                 <label for="remote">Дистанционная работа</label>
                 <Checkbox
                   id="remote"
@@ -127,22 +141,22 @@
               <div class="form-group">
                 <h3 class="section-title">Дополнительные условия</h3>
                 <div class="conditions-grid">
-                  <div class="condition-item">
-                    <Checkbox v-model="conditions.mentorSupport" :binary="true" />
-                    <label>Поддержка ментора</label>
-                  </div>
-                  <div class="condition-item">
-                    <Checkbox v-model="conditions.certificate" :binary="true" />
-                    <label>Сертификат по окончании</label>
-                  </div>
-                  <div class="condition-item">
-                    <Checkbox v-model="conditions.possibilityOfEmployment" :binary="true" />
-                    <label>Возможность трудоустройства</label>
-                  </div>
-                  <div class="condition-item">
-                    <Checkbox v-model="conditions.paid" :binary="true" />
-                    <label>Оплачиваемая стажировка</label>
-                  </div>
+                  <label class="condition-item">
+                    <Checkbox inputId="mentorSupport" v-model="conditions.mentorSupport" :binary="true" />
+                    <span>Поддержка ментора</span>
+                  </label>
+                  <label class="condition-item">
+                    <Checkbox inputId="certificate" v-model="conditions.certificate" :binary="true" />
+                    <span>Сертификат по окончании</span>
+                  </label>
+                  <label class="condition-item">
+                    <Checkbox inputId="possibilityOfEmployment" v-model="conditions.possibilityOfEmployment" :binary="true" />
+                    <span>Возможность трудоустройства</span>
+                  </label>
+                  <label class="condition-item">
+                    <Checkbox inputId="paid" v-model="conditions.paid" :binary="true" />
+                    <span>Оплачиваемая стажировка</span>
+                  </label>
                 </div>
               </div>
 
@@ -170,12 +184,13 @@ import {
   Textarea,
   InputNumber,
   MultiSelect,
+  RadioButton,
 } from "primevue";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import ProgressSpinner from 'primevue/progressspinner';
-import { createJob, updateJob, getTests, getTags, getJobById } from "@/api";
+import { createJob, updateJob, getTests, getTags, getJobById } from "../api";
 
 const router = useRouter();
 const route = useRoute();
@@ -191,6 +206,7 @@ const vacancy = ref({
   salary: 0,
   testId: null,
   tags: [],
+  jobType: "practice",
 });
 
 const responsibilities = ref([]);
@@ -251,6 +267,7 @@ onMounted(async () => {
         salary: job.salary || 0,
         testId: tests.value.find((test) => test.id === job.test_id) || null,
         tags: job.tags || [],
+        jobType: job.job_type,
       };
       benefits.value = job.benefits;
       
@@ -300,7 +317,8 @@ const handleSubmit = async () => {
       mentor_support: conditions.value.mentorSupport,
       certificate: conditions.value.certificate,
       possibility_of_employment: conditions.value.possibilityOfEmployment,
-      paid: conditions.value.paid
+      paid: conditions.value.paid,
+      job_type: vacancy.value.jobType,
     };
 
     console.log('Job data:', jobData);
@@ -385,16 +403,19 @@ textarea {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
+  cursor: pointer;
 }
 
-.condition-item label {
-  cursor: pointer;
+.condition-item span {
   user-select: none;
 }
 
 .condition-item :deep(.p-checkbox) {
   width: 1.25rem;
   height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .condition-item :deep(.p-checkbox .p-checkbox-box) {
@@ -404,5 +425,21 @@ textarea {
 .condition-item :deep(.p-checkbox .p-checkbox-box.p-highlight) {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
+}
+
+.radio-group {
+  display: flex;
+  gap: 2rem;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.radio-option span {
+  user-select: none;
 }
 </style>

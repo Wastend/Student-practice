@@ -9,13 +9,18 @@
             :key="vacancy.id"
             class="vacancy-card"
           >
-            <div class="vacancy-top">
-              <h3 class="vacancy-title">{{ vacancy.title }}</h3>
-              <p class="vacancy-description">{{ vacancy.description }}</p>
+            <div class="vacancy-header">
+              <h3>{{ vacancy.title }}</h3>
+              <span class="job-type">{{ vacancy.job_type === 'practice' ? 'Практика' : 'Стажировка' }}</span>
             </div>
-
+            <div class="vacancy-meta">
+              <div class="company-info">
+                <span class="company">{{ vacancy.company }}</span>
+                <span class="location">{{ vacancy.location }}</span>
+              </div>
+              <span class="date">{{ formatDate(vacancy.created_at) }}</span>
+            </div>
             <div class="vacancy-bottom">
-              <p>{{ vacancy.company }}</p>
               <RouterLink
                 :to="`/vacancies/${vacancy.id}`"
                 class="btn btn-primary"
@@ -40,6 +45,15 @@ const props = defineProps({
     required: true,
   },
 });
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
+};
 </script>
 
 <style scoped>
@@ -87,6 +101,12 @@ const props = defineProps({
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.vacancy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .vacancy-title {
   font-size: 1.5rem;
   font-weight: bold;
@@ -99,18 +119,51 @@ const props = defineProps({
   color: var(--text-color);
 }
 
+.vacancy-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.company-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.company {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.location {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+}
+
+.date {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+}
+
 .no-vacancies {
   text-align: center;
   font-size: 1.2rem;
   color: var(--secondary-color);
 }
 
-.vacancy-bottom p {
-  margin: 0;
-}
-
 .vacancy-bottom {
   display: flex;
   justify-content: space-between;
+}
+
+.job-type {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
 </style>

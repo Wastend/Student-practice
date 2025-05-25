@@ -38,7 +38,7 @@
   import { useToast } from "primevue/usetoast";
   import ProgressSpinner from 'primevue/progressspinner';
   import Skeleton from 'primevue/skeleton';
-  import { updateJob } from "@/api";
+  import { updateJob } from "../../../api";
 
   const props = defineProps({
     vacancies: {

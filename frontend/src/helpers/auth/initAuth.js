@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/auth';
-import { setAuthToken } from '@/api';
+import { setAuthToken } from '../../api';
 
 export default function initAuth() {
     const authStore = useAuthStore();

@@ -108,7 +108,7 @@ import { Button, Card, InputText, Password, Dropdown, Textarea } from "primevue"
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
-import { register } from "@/api";
+import { register } from "../api";
 
 const roles = [
   { id: 1, name: "Студент" },

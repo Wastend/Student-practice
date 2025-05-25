@@ -55,6 +55,18 @@
               :showClear="true"
             />
           </div>
+          <div class="filter-item">
+            <label for="jobType">Тип вакансии</label>
+            <Dropdown
+              id="jobType"
+              v-model="filters.jobType"
+              :options="jobTypes"
+              optionLabel="name"
+              placeholder="Выберите тип"
+              class="w-full"
+              :showClear="true"
+            />
+          </div>
         </div>
       </div>
       <VacanciesBlock :vacancies="filteredVacancies" />
@@ -66,7 +78,7 @@
 <script setup>
 import VacanciesBlock from "@/components/pages/homepage/VacanciesBlock.vue";
 import { useRoute } from "vue-router";
-import { getJobs } from "@/api/index";
+import { getJobs } from "../api";
 import { ref, onMounted, computed } from "vue";
 import { InputText, Dropdown } from "primevue";
 
@@ -78,7 +90,8 @@ const filters = ref({
   category: null,
   location: null,
   experience_level: null,
-  employment_type: null
+  employment_type: null,
+  jobType: null
 });
 
 // Опции для фильтров
@@ -110,6 +123,11 @@ const employmentTypes = ref([
   { name: 'Стажировка', value: 'internship' }
 ]);
 
+const jobTypes = ref([
+  { name: 'Практика', value: 'practice' },
+  { name: 'Стажировка', value: 'internship' }
+]);
+
 // Фильтрация вакансий
 const filteredVacancies = computed(() => {
   return vacancies.value.filter(vacancy => {
@@ -136,6 +154,11 @@ const filteredVacancies = computed(() => {
 
     // Фильтр по типу занятости
     if (filters.value.employment_type && vacancy.employment_type !== filters.value.employment_type.value) {
+      return false;
+    }
+
+    // Фильтр по типу вакансии
+    if (filters.value.jobType && vacancy.jobType !== filters.value.jobType.value) {
       return false;
     }
 

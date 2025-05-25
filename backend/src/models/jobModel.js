@@ -7,9 +7,11 @@ const getAllJobs = async (filters) => {
     let query = `
         SELECT 
             j.*,
+            u.company_name as company,
             CASE WHEN a.id IS NOT NULL THEN true ELSE false END as has_applied,
             a.status as application_status
         FROM jobs j
+        LEFT JOIN users u ON j.employer_id = u.id
         LEFT JOIN applications a ON j.id = a.job_id AND a.student_id = ?
         WHERE 1=1
     `;
@@ -18,6 +20,11 @@ const getAllJobs = async (filters) => {
     if (filters.status) {
         query += ' AND j.status = ?';
         params.push(filters.status);
+    }
+
+    if (filters.jobType) {
+        query += ' AND j.job_type = ?';
+        params.push(filters.jobType);
     }
 
     if (filters.category) {
@@ -60,7 +67,12 @@ const getAllJobs = async (filters) => {
 
 const getJobById = async (id) => {
     console.log('Получение вакансии с ID:', id);
-    const [rows] = await pool.query('SELECT * FROM jobs WHERE id = ?', [id]);
+    const [rows] = await pool.query(`
+        SELECT j.*, u.company_name as company 
+        FROM jobs j
+        LEFT JOIN users u ON j.employer_id = u.id
+        WHERE j.id = ?
+    `, [id]);
     console.log('Результат запроса:', rows[0]);
     
     if (!rows[0]) return null;
@@ -85,7 +97,7 @@ const createJob = async (job) => {
         title, description, category, location, remote, salary, employer_id, testId,
         responsibilities, requirements, tags,
         work_schedule, employment_type, experience_level, education_level, benefits,
-        mentor_support, certificate, possibility_of_employment, paid
+        mentor_support, certificate, possibility_of_employment, paid, jobType
     } = job;
     
     // Создаем вакансию
@@ -93,12 +105,12 @@ const createJob = async (job) => {
         `INSERT INTO jobs (
             title, description, category, location, remote, salary, employer_id, test_id,
             work_schedule, employment_type, experience_level, education_level, benefits,
-            mentor_support, certificate, possibility_of_employment, paid
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            mentor_support, certificate, possibility_of_employment, paid, job_type
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             title, description, category, location, remote, salary, employer_id, testId || null,
             work_schedule, employment_type, experience_level, education_level, benefits,
-            mentor_support, certificate, possibility_of_employment, paid
+            mentor_support, certificate, possibility_of_employment, paid, jobType || 'practice'
         ]
     );
     
@@ -127,7 +139,7 @@ const updateJob = async (id, job) => {
         title, description, category, location, remote, salary, testId,
         responsibilities, requirements, tags,
         work_schedule, employment_type, experience_level, education_level, benefits,
-        mentor_support, certificate, possibility_of_employment, paid, status
+        mentor_support, certificate, possibility_of_employment, paid, status, jobType
     } = job;
     
     // Обновляем основную информацию о вакансии
@@ -137,13 +149,13 @@ const updateJob = async (id, job) => {
             salary = ?, test_id = ?, work_schedule = ?, employment_type = ?,
             experience_level = ?, education_level = ?, benefits = ?,
             mentor_support = ?, certificate = ?, possibility_of_employment = ?, paid = ?,
-            status = ?
+            status = ?, job_type = ?
         WHERE id = ?`,
         [
             title, description, category, location, remote, salary, testId || null,
             work_schedule, employment_type, experience_level, education_level, benefits,
             mentor_support, certificate, possibility_of_employment, paid, status,
-            id
+            jobType || 'practice', id
         ]
     );
     

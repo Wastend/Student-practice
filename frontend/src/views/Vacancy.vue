@@ -13,7 +13,9 @@
         :paid="vacancy.paid"
         :vacancyId="route.params.id"
         :has_applied="vacancy.has_applied"
-        :application_status="vacancy.application_status" />
+        :application_status="vacancy.application_status"
+        :posted_at="vacancy.posted_at"
+        :jobType="vacancy.job_type" />
     </div>
   </div>
 </template>
@@ -48,7 +50,9 @@
     possibility_of_employment: false,
     paid: false,
     has_applied: false,
-    application_status: ''
+    application_status: '',
+    posted_at: '',
+    job_type: ''
   });
   const company = ref({});
 

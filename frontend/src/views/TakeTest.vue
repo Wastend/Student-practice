@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getTestById, submitTest } from "@/api";
+import { getTestById, submitTest } from "../api";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "primevue/usetoast";
 import ProgressSpinner from 'primevue/progressspinner';
