@@ -9,7 +9,7 @@
         </p>
         <div class="home-actions">
           <RouterLink to="/vacancies" class="btn btn-primary"
-            >Найти вакансии</RouterLink
+            >Найти предложение</RouterLink
           >
           <RouterLink to="/register" class="btn btn-secondary"
             >Регистрация</RouterLink

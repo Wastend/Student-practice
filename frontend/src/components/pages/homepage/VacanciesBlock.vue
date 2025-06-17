@@ -2,7 +2,7 @@
   <section class="vacancies">
     <div class="container">
       <div class="vacancies-wrap">
-        <h2 class="vacancies-title">Доступные вакансии</h2>
+        <h2 class="vacancies-title">Доступные предложения</h2>
         <div v-if="vacancies.length > 0" class="vacancies-list">
           <div
             v-for="vacancy in vacancies"
@@ -30,7 +30,7 @@
             </div>
           </div>
         </div>
-        <p v-else class="no-vacancies">Вакансии не найдены</p>
+        <p v-else class="no-vacancies">Предложения не найдены</p>
       </div>
     </div>
   </section>
@@ -82,6 +82,10 @@ const formatDate = (dateString) => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
+}
+
+div.vacancy-header {
+  gap: 15px;
 }
 
 .vacancy-card {

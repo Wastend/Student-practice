@@ -6,19 +6,19 @@
         <Card v-else class="create-vacancy-card">
           <template #title>
             <h2 class="create-vacancy-title">
-              {{ isEditing ? "Редактирование вакансии" : "Создание вакансии" }}
+              {{ isEditing ? "Редактирование предложения" : "Создание предложения" }}
             </h2>
           </template>
           <template #content>
             <form @submit.prevent="handleSubmit">
-              <!-- Название вакансии -->
+              <!-- Название предложении -->
               <div class="form-group">
-                <label for="title">Название вакансии</label>
+                <label for="title">Название предложения</label>
                 <InputText id="title" v-model="vacancy.title" required />
               </div>
 
               <div class="form-group">
-                <label>Тип вакансии</label>
+                <label>Тип предложения</label>
                 <div class="radio-group">
                   <label class="radio-option">
                     <RadioButton inputId="practice" v-model="vacancy.jobType" value="practice" />
@@ -162,7 +162,7 @@
 
               <!-- Кнопка отправки -->
               <Button
-                :label="isEditing ? 'Сохранить изменения' : 'Создать вакансию'"
+                :label="isEditing ? 'Сохранить изменения' : 'Создать предложение'"
                 class="btn-primary"
                 type="submit"
               />

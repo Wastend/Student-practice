@@ -360,6 +360,8 @@ const showAuthWarning = () => {
   });
 };
 
+const emit = defineEmits(['update:visible', 'applied']);
+
 const applyForVacancy = async () => {
   try {
     const response = await axios.post(`http://localhost:3000/api/jobs/${props.vacancyId}/apply`, {
@@ -372,6 +374,11 @@ const applyForVacancy = async () => {
       detail: 'Ваш отклик успешно отправлен',
       life: 3000
     });
+
+    // Обновляем состояние после успешного отклика
+    emit('applied');
+    props.has_applied = true;
+    props.application_status = 'applied';
   } catch (error) {
     toast.add({
       severity: 'error',

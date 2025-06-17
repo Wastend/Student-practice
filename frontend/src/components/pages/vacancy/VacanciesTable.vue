@@ -25,8 +25,8 @@
           </template>
         </Column>
       </DataTable>
-      <p v-else class="no-data">Вакансии еще не добавлены.</p>
-      <Button label="Создать вакансию" class="btn-primary" style="margin-top: 20px" @click="goToCreateVacancy" />
+      <p v-else class="no-data">Предложения еще не добавлены.</p>
+      <Button label="Создать предложение" class="btn-primary" style="margin-top: 20px" @click="goToCreateVacancy" />
     </template>
   </div>
 </template>
@@ -65,13 +65,13 @@
   };
 
   const deleteVacancy = async (id) => {
-    if (confirm("Вы уверены, что хотите удалить эту вакансию?")) {
+    if (confirm("Вы уверены, что хотите удалить эту предложение?")) {
       try {
         await props.vacancyDelete(id);
-        toast.add({ severity: 'success', summary: 'Успех', detail: 'Вакансия успешно удалена!', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Успех', detail: 'Предложение успешно удалена!', life: 3000 });
       } catch (error) {
-        console.error("Ошибка при удалении вакансии:", error);
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить вакансию', life: 3000 });
+        console.error("Ошибка при удалении предложения:", error);
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось удалить предложение', life: 3000 });
       }
     }
   };
@@ -104,14 +104,14 @@
         };
 
         await updateJob(id, updateData);
-        toast.add({ severity: 'success', summary: 'Успех', detail: `Вакансия ${newStatus === "published" ? "опубликована" : "снята с публикации"}!`, life: 3000 });
+        toast.add({ severity: 'success', summary: 'Успех', detail: `Предложение ${newStatus === "published" ? "опубликована" : "снята с публикации"}!`, life: 3000 });
         vacancies.value[vacancyIndex] = {
           ...vacancy,
           status: newStatus,
         };
       } catch (error) {
-        console.error("Ошибка при изменении статуса вакансии:", error);
-        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить статус вакансии', life: 3000 });
+        console.error("Ошибка при изменении статуса предложения:", error);
+        toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось изменить статус предложения', life: 3000 });
       }
     }
   };

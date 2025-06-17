@@ -15,7 +15,8 @@
         :has_applied="vacancy.has_applied"
         :application_status="vacancy.application_status"
         :posted_at="vacancy.posted_at"
-        :jobType="vacancy.job_type" />
+        :jobType="vacancy.job_type"
+        @applied="handleApplied" />
     </div>
   </div>
 </template>
@@ -76,12 +77,18 @@
     }
   };
 
+  const handleApplied = () => {
+    // Обновляем состояние вакансии после успешного отклика
+    vacancy.value.has_applied = true;
+    vacancy.value.application_status = 'applied';
+  };
+
   onMounted(() => {
     fetchVacancy();
   });
 </script>
 
-<style scoped>
+<style>
   .vacancy-page {
     padding: 2rem 0;
   }
@@ -90,5 +97,14 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
+  }
+
+  .vacancy-actions .btn-primary {
+    transition: .3s ease-in-out;
+  }
+
+  .vacancy-actions .btn-primary:hover,
+  .vacancy-actions .btn-primary:active {
+    background-color: #2196f3 !important;
   }
 </style>

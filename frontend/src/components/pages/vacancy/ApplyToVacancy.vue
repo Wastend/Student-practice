@@ -1,7 +1,7 @@
 <template>
   <Dialog
     v-model:visible="visible"
-    :header="'Отклик на вакансию ' + vacancyTitle"
+    :header="'Отклик на предложение ' + vacancyTitle"
     :style="{ width: '50vw' }"
     :modal="true"
   >

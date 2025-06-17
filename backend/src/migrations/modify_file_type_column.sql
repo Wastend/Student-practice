@@ -1,0 +1,2 @@
+ALTER TABLE cover_letters
+MODIFY COLUMN file_type VARCHAR(100) NOT NULL; 

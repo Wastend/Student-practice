@@ -11,4 +11,18 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-module.exports = { authenticateToken };
+const checkRole = (role) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Необходима авторизация" });
+    }
+
+    if (req.user.role !== role) {
+      return res.status(403).json({ message: "Нет доступа" });
+    }
+
+    next();
+  };
+};
+
+module.exports = { authenticateToken, checkRole };

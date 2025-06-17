@@ -7,7 +7,9 @@ import Profile from "../views/Profile.vue";
 import Register from "../views/Register.vue";
 import Vacancies from "../views/Vacancies.vue";
 import Vacancy from "../views/Vacancy.vue";
+import EmployerVacancyTasks from "../components/pages/vacancy/EmployerVacancyTasks.vue";
 import { checkAuth } from './authMiddleware';
+import StudentTasks from '@/views/StudentTasks.vue';
 
 const routes = [
   {
@@ -40,6 +42,11 @@ const routes = [
         name: "Vacancy Card",
         component: Vacancy,
       },
+      {
+        path: ":id/tasks",
+        name: "Vacancy Tasks",
+        component: EmployerVacancyTasks,
+      },
     ],
   },
   {
@@ -66,6 +73,15 @@ const routes = [
     path: "/register",
     name: "Register",
     component: Register,
+  },
+  {
+    path: '/student/tasks',
+    name: 'StudentTasks',
+    component: StudentTasks,
+    meta: {
+      requiresAuth: true,
+      studentOnly: true
+    }
   },
 ];
 

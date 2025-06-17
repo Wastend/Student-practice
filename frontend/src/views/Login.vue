@@ -13,7 +13,7 @@
             </div>
             <div class="form-group">
               <label for="password">Пароль</label>
-              <Password id="password" v-model="form.password" toggleMask required />
+              <Password id="password" v-model="form.password" toggleMask :feedback="false" required />
             </div>
             <Button label="Войти" class="btn-primary" type="submit" />
           </form>
@@ -50,15 +50,21 @@ const form = ref({
 const handleSubmit = async () => {
   try {
     const response = await login(form.value.email, form.value.password);
-    console.log('Login Response:', response); // Отладочная информация
+    console.log('Login Response:', response);
     
     // Сохраняем токен и данные пользователя
     saveToken(response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
     
     // Обновляем store
     authStore.setToken(response.token);
     authStore.setUser(response.user);
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Успех',
+      detail: 'Вы успешно вошли в систему',
+      life: 3000
+    });
     
     router.push("/profile");
   } catch (error) {

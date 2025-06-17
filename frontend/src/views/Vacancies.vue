@@ -4,7 +4,7 @@
     <div v-else class="vacancies-page">
       <div class="filters-section">
         <div class="search-box">
-          <InputText v-model="filters.search" placeholder="Поиск вакансий..." class="search-input" />
+          <InputText v-model="filters.search" placeholder="Поиск предложений..." class="search-input" />
         </div>
         <div class="filters-grid">
           <div class="filter-item">

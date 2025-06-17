@@ -36,10 +36,10 @@
               </ul>
             </div>
             <div v-if="user.role_id === 2" class="vacancies-section">
-              <h3>Ваши вакансии</h3>
+              <h3>Ваши предложения</h3>
               <div v-if="vacancies.length === 0" class="no-data-message">
                 <i class="pi pi-briefcase" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
-                <p>У вас пока нет созданных вакансий</p>
+                <p>У вас пока нет созданных предложений</p>
                 <Button label="Создать вакансию" class="p-button-outlined" @click="router.push('/vacancies/create')" />
               </div>
               <VacanciesTable v-else :vacancies="vacancies" :vacancy-delete="deleteVacancy" />
@@ -54,12 +54,14 @@
               <TestsTable v-else :tests="tests" @editTest="editTest" @deleteTest="deleteTest" />
             </div>
 
+            <EmployerTasks v-if="user.role_id === 2" />
+
             <div v-if="user.role_id === 1" class="applications-section">
               <h3>Ваши заявки</h3>
               <div v-if="applications.length === 0" class="no-data-message">
                 <i class="pi pi-send" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
                 <p>У вас пока нет отправленных заявок</p>
-                <Button label="Найти вакансии" class="p-button-outlined" @click="router.push('/vacancies')" />
+                <Button label="Найти предложение" class="p-button-outlined" @click="router.push('/vacancies')" />
               </div>
               <div v-else class="applications-list">
                 <div v-for="application in applications" :key="application.id" class="application-item">
@@ -74,15 +76,24 @@
                   <div class="application-date">
                     Отправлена: {{ new Date(application.applied_at).toLocaleDateString('ru-RU') }}
                   </div>
+                  <div class="application-actions" v-if="application.status === 'accepted'">
+                    <Button 
+                      class="p-button-success"
+                      @click="router.push('/student/tasks')"
+                    >
+                      <i class="pi pi-tasks"></i>
+                      Перейти к заданиям
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div v-if="user.role_id === 2" class="applications-section">
-              <h3>Отклики на вакансии</h3>
+              <h3>Отклики на предложения</h3>
               <div v-if="companyApplications.length === 0" class="no-data-message">
                 <i class="pi pi-send" style="font-size: 2rem; color: var(--text-color-secondary);"></i>
-                <p>У вас пока нет откликов на вакансии</p>
+                <p>У вас пока нет откликов на предложения</p>
               </div>
               <div v-else class="applications-list">
                 <div v-for="application in companyApplications" :key="application.id" class="application-item">
@@ -233,6 +244,8 @@ import { useToast } from "primevue/usetoast";
 import ProgressSpinner from 'primevue/progressspinner';
 import VacanciesTable from '@/components/pages/vacancy/VacanciesTable.vue'
 import TestsTable from '@/components/pages/vacancy/TestsTable.vue'
+import EmployerTasks from '@/components/pages/profile/EmployerTasks.vue';
+import StudentTasks from '@/components/pages/profile/StudentTasks.vue';
 import { 
   getProfile, 
   updateProfile, 
@@ -464,6 +477,16 @@ const getStatusText = (status) => {
   return statusMap[status] || status;
 };
 
+const getStatusSeverity = (status) => {
+  const statusMap = {
+    'applied': 'info',
+    'interview': 'warning',
+    'rejected': 'danger',
+    'accepted': 'success'
+  };
+  return statusMap[status] || 'info';
+};
+
 const updateApplicationStatus = async (applicationId, newStatus) => {
   try {
     await updateApplicationStatusAPI(applicationId, newStatus);
@@ -508,6 +531,10 @@ const downloadStudentCoverLetter = async (coverLetterId) => {
       life: 3000
     });
   }
+};
+
+const cancelApplication = (applicationId) => {
+  // Implementation of cancelApplication method
 };
 </script>
 
@@ -649,6 +676,11 @@ const downloadStudentCoverLetter = async (coverLetterId) => {
   margin-top: 1rem;
 }
 
+.tests-section,
+.applications-section {
+  margin-top: 30px;
+}
+
 .applications-list {
   display: flex;
   flex-direction: column;
@@ -656,10 +688,51 @@ const downloadStudentCoverLetter = async (coverLetterId) => {
 }
 
 .application-item {
-  padding: 1rem;
-  border: 1px solid var(--border-color);
+  background: var(--surface-card);
   border-radius: 8px;
-  background-color: var(--surface-ground);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--surface-border);
+}
+
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.application-header h4 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.application-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color-secondary);
+}
+
+.detail-item i {
+  color: var(--primary-color);
+}
+
+.application-actions {
+  margin-top: 1rem;
+}
+
+.application-actions .p-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .application-info {
@@ -742,5 +815,52 @@ const downloadStudentCoverLetter = async (coverLetterId) => {
 .status-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.tasks-section {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--surface-card);
+  border-radius: 8px;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--surface-ground);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+}
+
+.task-description {
+  margin: 0;
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+}
+
+.task-actions {
+  margin-left: 1rem;
 }
 </style>

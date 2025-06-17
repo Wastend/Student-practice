@@ -15,7 +15,7 @@
             </div>
 
             <!-- Тема теста -->
-            <!-- <div class="form-group">
+            <div class="form-group">
               <label for="testTopic">Тема теста</label>
               <InputText id="testTopic" v-model="testTopic" placeholder="Введите тему теста" />
               <Button
@@ -24,7 +24,7 @@
                 @click="generateTest"
                 :disabled="isGenerating"
               />
-            </div> -->
+            </div>
 
             <!-- Вопросы -->
             <div class="form-group">

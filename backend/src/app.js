@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const indexRoutes = require('./routes/index');
 const coverLetterRoutes = require('./routes/coverLetterRoutes');
+const jobsRouter = require('./routes/jobRoutes');
+const tasksRouter = require('./routes/tasks');
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.get('/api/health', (req, res) => {
 // Основные роуты
 app.use('/api', indexRoutes);
 app.use('/api/cover-letters', coverLetterRoutes);
+app.use('/api/jobs', jobsRouter);
+app.use('/api/tasks', tasksRouter);
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -47,3 +51,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
 });
+
+module.exports = app;

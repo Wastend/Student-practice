@@ -21,8 +21,9 @@
               to="/vacancies"
               class="nav-item"
               @click="closeMobileMenu"
-              >Вакансии</RouterLink
             >
+              Предложения
+            </RouterLink>
           </nav>
 
           <button
@@ -47,12 +48,14 @@
 
 <script setup>
 import SvgIcon from "@/components/ui/SvgIcon.vue";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { hasToken, removeToken } from "@/utils/auth";
+import { useAuthStore } from "@/stores/auth";
 
 const isDarkTheme = ref(false);
-const isAuthenticated = ref(hasToken());
+const authStore = useAuthStore();
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 const isMobileMenuOpen = ref(false);
 const router = useRouter();
 
@@ -64,7 +67,7 @@ const toggleTheme = () => {
 const handleAuthClick = () => {
   if (isAuthenticated.value) {
     removeToken();
-    isAuthenticated.value = false;
+    authStore.isAuthenticated = false;
     router.push("/login");
   } else {
     router.push("/login");
